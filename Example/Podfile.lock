@@ -1,0 +1,50 @@
+PODS:
+  - AFNetworking (3.1.0):
+    - AFNetworking/NSURLSession (= 3.1.0)
+    - AFNetworking/Reachability (= 3.1.0)
+    - AFNetworking/Security (= 3.1.0)
+    - AFNetworking/Serialization (= 3.1.0)
+    - AFNetworking/UIKit (= 3.1.0)
+  - AFNetworking/NSURLSession (3.1.0):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.1.0)
+  - AFNetworking/Security (3.1.0)
+  - AFNetworking/Serialization (3.1.0)
+  - AFNetworking/UIKit (3.1.0):
+    - AFNetworking/NSURLSession
+  - Alamofire (3.4.0)
+  - LogTape (0.1.0)
+  - LogTape+AFNetworking (0.1.0):
+    - AFNetworking
+    - LogTape
+  - LogTape+Alamofire (0.1.0):
+    - Alamofire
+    - LogTape
+
+DEPENDENCIES:
+  - AFNetworking
+  - Alamofire
+  - LogTape (from `../`)
+  - LogTape+AFNetworking (from `../`)
+  - LogTape+Alamofire (from `../`)
+
+EXTERNAL SOURCES:
+  LogTape:
+    :path: "../"
+  LogTape+AFNetworking:
+    :path: "../"
+  LogTape+Alamofire:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
+  Alamofire: c19a627cefd6a95f840401c49ab1f124e07f54ee
+  LogTape: 34dd6e6b9c53310c8eeed57a71b0bd613e6128fc
+  LogTape+AFNetworking: 74bca2ea6fa0de52bae67e560342be36c5aee684
+  LogTape+Alamofire: 38d4838a8d61b012bf0a15c01e3cd78de2e1ffd3
+
+PODFILE CHECKSUM: 4325a141d0ea0f9b7e8f4833c1d2954db477f266
+
+COCOAPODS: 1.0.1

@@ -1,0 +1,6 @@
+framework module LogTape {
+  umbrella header "LogTape-umbrella.h"
+
+  export *
+  module * { export * }
+}

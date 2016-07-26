@@ -1,0 +1,15 @@
+use_frameworks!
+
+target 'LogTape_Example' do
+  pod 'AFNetworking'
+  pod 'Alamofire'
+  pod 'LogTape', :path => '../'
+  pod 'LogTape+AFNetworking', :path => '../'
+  pod 'LogTape+Alamofire', :path => '../'
+
+  target 'LogTape_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

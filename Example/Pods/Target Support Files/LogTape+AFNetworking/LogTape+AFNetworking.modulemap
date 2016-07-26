@@ -1,0 +1,6 @@
+framework module LogTape_AFNetworking {
+  umbrella header "LogTape+AFNetworking-umbrella.h"
+
+  export *
+  module * { export * }
+}

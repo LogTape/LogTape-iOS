@@ -1,0 +1,27 @@
+{
+  "name": "LogTape",
+  "version": "0.1.0",
+  "summary": "A short description of LogTape.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/<GITHUB_USERNAME>/LogTape",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Dan Nilsson": "dan@binarypeak.se"
+  },
+  "source": {
+    "git": "https://github.com/<GITHUB_USERNAME>/LogTape.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "LogTape/Classes/**/*",
+  "resource_bundles": {
+    "LogTape": [
+      "LogTape/Assets/*.png"
+    ]
+  }
+}
