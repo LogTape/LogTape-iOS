@@ -4,7 +4,6 @@ import AFNetworking
 
 public class LogTapeAFNetworking {
     static private var instance = LogTapeAFNetworking()
-    var requestTimes = [Int : NSDate]()
     
     public static func startLogging() {
         self.instance.registerListeners()
@@ -32,16 +31,14 @@ public class LogTapeAFNetworking {
             return
         }
         
-        requestTimes[task.taskIdentifier] = NSDate()
         LogTape.LogURLSessionTaskStart(task)
     }
     
     func networkRequestDidFinish(notification : NSNotification) {
-        guard let task = notification.object as? NSURLSessionTask, startTime = requestTimes[task.taskIdentifier] else {
+        guard let task = notification.object as? NSURLSessionTask else {
             return
         }
-
-        let elapsedTime = NSDate().timeIntervalSinceDate(startTime)
+        
         var error = task.error
         var data : NSData? = nil
 
@@ -50,8 +47,7 @@ public class LogTapeAFNetworking {
             data = userInfo[AFNetworkingTaskDidCompleteResponseDataKey] as? NSData
         }
         
-        LogTape.LogURLSessionTaskFinish(task, elapsedTime: elapsedTime, data : data, error: error)
-        requestTimes.removeValueForKey(task.taskIdentifier)
+        LogTape.LogURLSessionTaskFinish(task, data : data, error: error)
     }
     
     func unregisterListeners() {

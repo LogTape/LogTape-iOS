@@ -421,19 +421,19 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         var bundle = NSBundle.mainBundle()
         
         if let releaseVersionnumber = bundle.infoDictionary?["CFBundleShortVersionString"] as? String {
-            properties.addObject(["App version" : releaseVersionnumber])
+            properties.addObject(["label" : "App version", "value" : releaseVersionnumber])
         }
         
         if let buildVersionnumber = bundle.infoDictionary?["CFBundleVersion"] as? String {
-            properties.addObject(["Build" : buildVersionnumber])
+            properties.addObject(["label" : "Build", "value" : buildVersionnumber])
         }
         
         let device = UIDevice.currentDevice()
-        properties.addObject(["Device type" : device.model])
-        properties.addObject(["OS Version" : "\(device.systemName) \(device.systemVersion)"])
-        properties.addObject(["Description" : self.descriptionView.text])
+        properties.addObject(["label" : "Device type", "value" : device.model])
+        properties.addObject(["label" : "OS Version", "value" : "\(device.systemName) \(device.systemVersion)"])
+        properties.addObject(["label" : "Description", "value" : self.descriptionView.text])
         
-        let eventsArray : NSArray = LogTape.events.map { $0.toDictionary() }
+        let eventsArray : NSArray = LogTape.Events.map { $0.toDictionary() }
         body["events"] = eventsArray
         body["timestamp"] = LogEvent.currentTimeAsUTCString()
         body["properties"] = properties

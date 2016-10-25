@@ -8,7 +8,6 @@ struct WeakManagerRef {
 
 class LogTapeAlamofire {
     static private var instance = LogTapeAlamofire()
-    var requestTimes = [Int : NSDate]()
     var managers = [WeakManagerRef]()
 
     func addManager(manager : Manager) {
@@ -66,20 +65,17 @@ class LogTapeAlamofire {
             return
         }
         
-        requestTimes[task.taskIdentifier] = NSDate()
         LogTape.LogURLSessionTaskStart(task)
     }
     
     func networkRequestDidFinish(notification : NSNotification) {
         guard let task = notification.object as? NSURLSessionTask,
-            startTime = requestTimes[task.taskIdentifier],
             delegate = self.delegateFromTask(task)
             else
         {
             return
         }
 
-        let elapsedTime = NSDate().timeIntervalSinceDate(startTime)
         var error = task.error
         var data : NSData? = nil
 
@@ -94,8 +90,7 @@ class LogTapeAlamofire {
             }
         }
         
-        LogTape.LogURLSessionTaskFinish(task, elapsedTime: elapsedTime, data : data, error: error)
-        requestTimes.removeValueForKey(task.taskIdentifier)
+        LogTape.LogURLSessionTaskFinish(task, data : data, error: error)
     }
     
     func unregisterListeners() {

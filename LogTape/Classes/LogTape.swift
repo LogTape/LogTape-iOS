@@ -152,8 +152,10 @@ class MessageLogEvent : LogEvent {
 
 public class LogTape {
     static private var instance : LogTape? = nil
-
-    var apiKey = ""
+    
+    private var requestTimes = [NSURLSessionTask : NSDate]()
+    private var events = [LogEvent]()
+    private var apiKey = ""
     
     init(apiKey : String) {
         self.apiKey = apiKey
@@ -172,22 +174,47 @@ public class LogTape {
         
     }
     
-    static var events = [LogEvent]()
-    
-    static public func Log(message : String) {
+    private func Log(message : String) {
         self.events.append(MessageLogEvent(message: message))
     }
     
-    static public func LogObject(object : NSDictionary, message : String = "") {
+    private func LogObject(object : NSDictionary, message : String = "") {
         self.events.append(ObjectLogEvent(object: object, message: message))
     }
     
-    static public func LogURLSessionTaskStart(task : NSURLSessionTask) {
-        
+    private func LogURLSessionTaskStart(task : NSURLSessionTask) {
+        self.requestTimes[task] = NSDate()
     }
     
-    static public func LogURLSessionTaskFinish(task : NSURLSessionTask, elapsedTime : NSTimeInterval, data : NSData?, error : NSError?)
+    private func LogURLSessionTaskFinish(task : NSURLSessionTask, data : NSData?, error : NSError?)
     {
-        self.events.append(RequestLogEvent(response: task.response, request: task.originalRequest, responseData: data, error: error, elapsedTime : elapsedTime))
+        if let startTime = self.requestTimes[task] {
+            let elapsedTime = NSDate().timeIntervalSinceDate(startTime)
+            
+            self.events.append(RequestLogEvent(response: task.response, request: task.originalRequest, responseData: data, error: error, elapsedTime : elapsedTime))
+            self.requestTimes.removeValueForKey(task)
+        }
+    }
+
+    // Convenience static methods
+    static public func Log(message : String) {
+        self.instance?.Log(message)
+    }
+    
+    static public func LogObject(object : NSDictionary, message : String = "") {
+        self.instance?.LogObject(object, message : message)
+    }
+    
+    static public func LogURLSessionTaskStart(task : NSURLSessionTask) {
+        self.instance?.LogURLSessionTaskStart(task)
+    }
+    
+    static public func LogURLSessionTaskFinish(task : NSURLSessionTask, data : NSData?, error : NSError?)
+    {
+        self.instance?.LogURLSessionTaskFinish(task, data: data, error: error)
+    }
+    
+    static var Events : [LogEvent] {
+        return self.instance?.events ?? []
     }
 }
