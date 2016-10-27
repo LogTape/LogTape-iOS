@@ -11,41 +11,41 @@ import Foundation
 class DialogTransitionAnimator : NSObject, UIViewControllerAnimatedTransitioning {
     var presenting = false
 
-    func transitionDuration(transitionContext: UIViewControllerContextTransitioning?) -> NSTimeInterval {
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
         return 0.4
     }
     
     var toVc : UIViewController? = nil
     var fromVc : UIViewController? = nil
     
-    func animationEnded(transitionCompleted: Bool) {
+    func animationEnded(_ transitionCompleted: Bool) {
 
     }
     
-    func animateTransition(transitionContext: UIViewControllerContextTransitioning) {
-        let fromVc = transitionContext.viewControllerForKey(UITransitionContextFromViewControllerKey)!
-        let toVc = transitionContext.viewControllerForKey(UITransitionContextToViewControllerKey)!
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        let fromVc = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from)!
+        let toVc = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to)!
         
 
         
         if self.presenting {
-            fromVc.view.userInteractionEnabled = false
-            transitionContext.containerView()?.addSubview(toVc.view)
+            fromVc.view.isUserInteractionEnabled = false
+            transitionContext.containerView.addSubview(toVc.view)
             
             toVc.view.alpha = 0.0
-            UIView.animateWithDuration(self.transitionDuration(transitionContext), animations: { () -> Void in
-                fromVc.view.tintAdjustmentMode = .Dimmed
+            UIView.animate(withDuration: self.transitionDuration(using: transitionContext), animations: { () -> Void in
+                fromVc.view.tintAdjustmentMode = .dimmed
                 toVc.view.alpha = 1.0
                 
                 }, completion: { completed in
                     transitionContext.completeTransition(true)
             })
         } else {
-            toVc.view.userInteractionEnabled = true
+            toVc.view.isUserInteractionEnabled = true
             
-            UIView.animateWithDuration(self.transitionDuration(transitionContext), animations: { () -> Void in
+            UIView.animate(withDuration: self.transitionDuration(using: transitionContext), animations: { () -> Void in
                 fromVc.view.alpha = 0.0
-                toVc.view.tintAdjustmentMode = .Automatic
+                toVc.view.tintAdjustmentMode = .automatic
                 
                 }, completion: { completed in
                     transitionContext.completeTransition(true)
@@ -61,7 +61,7 @@ class CenteredButton : UIButton {
         
         // lower the text and push it left so it appears centered
         //  below the image
-        var titleEdgeInsets = UIEdgeInsetsZero
+        var titleEdgeInsets = UIEdgeInsets.zero
         if let image = self.imageView?.image {
             titleEdgeInsets.left = -image.size.width
             titleEdgeInsets.bottom = -(image.size.height + spacing)
@@ -70,10 +70,10 @@ class CenteredButton : UIButton {
         
         // raise the image and push it right so it appears centered
         //  above the text
-        var imageEdgeInsets = UIEdgeInsetsZero
-        if let text: NSString = self.titleLabel?.text, let font = self.titleLabel?.font {
+        var imageEdgeInsets = UIEdgeInsets.zero
+        if let text: NSString = self.titleLabel?.text as NSString?, let font = self.titleLabel?.font {
             let attributes = [NSFontAttributeName:font]
-            let titleSize = text.sizeWithAttributes(attributes)
+            let titleSize = text.size(attributes: attributes)
             imageEdgeInsets.top = -(titleSize.height + spacing)
             imageEdgeInsets.right = -titleSize.width
         }
@@ -85,24 +85,24 @@ class CenteredButton : UIButton {
 
 
 class InsetTextField : UITextField {
-    override func textRectForBounds(bounds: CGRect) -> CGRect {
-        return CGRectInset(bounds, 5, 2)
+    override func textRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.insetBy(dx: 5, dy: 2)
     }
     
-    override func editingRectForBounds(bounds: CGRect) -> CGRect {
-        return self.textRectForBounds(bounds)
+    override func editingRect(forBounds bounds: CGRect) -> CGRect {
+        return self.textRect(forBounds: bounds)
     }
 }
 
-func UIImageFromColor(color: UIColor) -> UIImage {
+func UIImageFromColor(_ color: UIColor) -> UIImage {
     let rect = CGRect(x: 0, y: 0, width: 1, height: 1)
     UIGraphicsBeginImageContext(rect.size)
     let context = UIGraphicsGetCurrentContext()
-    CGContextSetFillColorWithColor(context, color.CGColor)
-    CGContextFillRect(context, rect)
+    context?.setFillColor(color.cgColor)
+    context?.fill(rect)
     let img = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()
-    return img
+    return img!
 }
 
 
@@ -111,7 +111,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
     var imageView = UIImageView()
     var descriptionView = UITextView()
     var containerView = UIView()
-    var loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
+    var loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     var apiKey = ""
     
     var dimView = UIView()
@@ -137,34 +137,34 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         
         let font = UIFont(name: "Avenir-Light", size: 15.0)
 
-        self.view.opaque = false
-        self.view.backgroundColor = UIColor.clearColor()
+        self.view.isOpaque = false
+        self.view.backgroundColor = UIColor.clear
 
         self.view.addSubview(self.dimView)
     
         self.dimView.translatesAutoresizingMaskIntoConstraints = false
-        self.dimView.opaque = false
-        self.dimView.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.4)
+        self.dimView.isOpaque = false
+        self.dimView.backgroundColor = UIColor.black.withAlphaComponent(0.4)
         self.dimView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(LogTapeVC.dimViewTapped)))
 
         self.topLabel.text = "Report issue"
-        self.topLabel.textColor = UIColor.blackColor()
+        self.topLabel.textColor = UIColor.black
         self.topLabel.translatesAutoresizingMaskIntoConstraints = false
         self.topLabel.font = UIFont(name: "Avenir-Medium", size: 18.0)
         self.topLabel.textColor = textColor
-        self.topLabel.textAlignment = .Center
+        self.topLabel.textAlignment = .center
 
-        self.errorLabel.hidden = true
-        self.errorLabel.textColor = UIColor.redColor()
+        self.errorLabel.isHidden = true
+        self.errorLabel.textColor = UIColor.red
         self.errorLabel.translatesAutoresizingMaskIntoConstraints = false
         self.errorLabel.font = UIFont(name: "Avenir-Light", size: 10.0)
-        self.errorLabel.textAlignment = .Center
+        self.errorLabel.textAlignment = .center
         
         self.helpLabel.text = "Tap screenshot to draw"
-        self.helpLabel.textColor = UIColor.darkGrayColor()
+        self.helpLabel.textColor = UIColor.darkGray
         self.helpLabel.translatesAutoresizingMaskIntoConstraints = false
         self.helpLabel.font = UIFont(name: "Avenir-Light", size: 10.0)
-        self.helpLabel.textAlignment = .Center
+        self.helpLabel.textAlignment = .center
         
         self.view.addSubview(self.containerView)
         
@@ -179,42 +179,42 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
             Constraint.PinTop(dimView, toView: view),
             Constraint.PinBottom(dimView, toView: view)])
 
-        self.progressView.backgroundColor = UIColor.whiteColor()
+        self.progressView.backgroundColor = UIColor.white
         self.progressView.translatesAutoresizingMaskIntoConstraints = false
         self.progressView.layer.cornerRadius = 4.0
         self.progressView.alpha = 0.0
-        self.progressView.hidden = true
+        self.progressView.isHidden = true
         
-        let borderWidth = 1.0 / UIScreen.mainScreen().scale
+        let borderWidth = 1.0 / UIScreen.main.scale
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
         self.imageView.layer.borderWidth = borderWidth
-        self.imageView.layer.borderColor = borderColor.CGColor
-        self.imageView.contentMode = .ScaleAspectFit
+        self.imageView.layer.borderColor = borderColor.cgColor
+        self.imageView.contentMode = .scaleAspectFit
         
         self.containerView.addSubview(imageView)
 
-        self.containerView.backgroundColor = UIColor.whiteColor()
+        self.containerView.backgroundColor = UIColor.white
         self.containerView.translatesAutoresizingMaskIntoConstraints = false
         self.containerView.layer.borderWidth = borderWidth
         self.containerView.layer.cornerRadius = 4.0
-        self.containerView.layer.borderColor = self.borderColor.CGColor
+        self.containerView.layer.borderColor = self.borderColor.cgColor
         
         self.descriptionView.font = UIFont(name: "Avenir-Light", size: 13.0)
         self.descriptionView.contentInset = UIEdgeInsetsMake(-4, 0, 0, 0)
-        self.descriptionView.layer.borderColor = self.borderColor.CGColor
+        self.descriptionView.layer.borderColor = self.borderColor.cgColor
         self.descriptionView.layer.cornerRadius = 4.0
         self.descriptionView.layer.borderWidth = borderWidth
         self.descriptionView.translatesAutoresizingMaskIntoConstraints = false
         self.descriptionView.delegate = self
         
         self.containerView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(LogTapeVC.containerTapped)))
-        self.descriptionView.textColor = UIColor.lightGrayColor()
+        self.descriptionView.textColor = UIColor.lightGray
         self.descriptionView.text = self.placeholderText
         
         self.descriptionView.translatesAutoresizingMaskIntoConstraints = false
         
         self.imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(LogTapeVC.imageTapped)))
-        self.imageView.userInteractionEnabled = true
+        self.imageView.isUserInteractionEnabled = true
 
         if let image = self.image {
             self.imageView.image = self.image
@@ -258,10 +258,10 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
             progressStatusYConstraint
             ])
 
-        progressStatusLabel.font = font?.fontWithSize(12.0)
+        progressStatusLabel.font = font?.withSize(12.0)
         progressStatusLabel.translatesAutoresizingMaskIntoConstraints = false
         progressStatusLabel.text = "Uploading.."
-        progressStatusLabel.textAlignment = .Center
+        progressStatusLabel.textAlignment = .center
         progressStatusLabel.textColor = textColor
         
         self.containerView.addSubview(self.helpLabel)
@@ -314,11 +314,11 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
             Constraint.PinTopToBottom(progressView, toView: topLabel)
             ])
         
-        self.containerView.bringSubviewToFront(self.progressView)
+        self.containerView.bringSubview(toFront: self.progressView)
     }
 
     func dimViewTapped() {
-        self.presentingViewController?.dismissViewControllerAnimated(true, completion: nil)
+        self.presentingViewController?.dismiss(animated: true, completion: nil)
     }
     
     func imageTapped() {
@@ -329,11 +329,11 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         drawVc.onSaveBlock = { image in
             self.imageView.image = image
             self.image = image
-            self.dismissViewControllerAnimated(true, completion: nil)
+            self.dismiss(animated: true, completion: nil)
         }
 
         let nav = UINavigationController(rootViewController: drawVc)
-        self.presentViewController(nav, animated: true, completion: nil)
+        self.present(nav, animated: true, completion: nil)
     }
 
     func containerTapped() {
@@ -341,35 +341,35 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
     }
     
     func cancel() {
-        self.presentingViewController?.dismissViewControllerAnimated(true, completion: nil)
+        self.presentingViewController?.dismiss(animated: true, completion: nil)
     }
     
     func uploadFailed() {
-        self.submitButton.enabled = true
-        self.cancelButton.enabled = true
-        self.dimView.userInteractionEnabled = true
+        self.submitButton.isEnabled = true
+        self.cancelButton.isEnabled = true
+        self.dimView.isUserInteractionEnabled = true
         
-        UIView.animateWithDuration(0.3, animations: { 
+        UIView.animate(withDuration: 0.3, animations: { 
             self.progressView.alpha = 0.0
-            }) { (completed) in
-                self.progressView.hidden = true
-        }
+            }, completion: { (completed) in
+                self.progressView.isHidden = true
+        }) 
 
-        self.errorLabel.hidden = false
+        self.errorLabel.isHidden = false
         self.errorLabel.text = "Failed to upload. Try again."
         errorLabelHeightConstraint.constant = 15.0
         
-        UIView.animateWithDuration(0.4) {
+        UIView.animate(withDuration: 0.4, animations: {
             self.view.layoutIfNeeded()
-        }
+        }) 
     }
     
-    func uploadSuccessfulWithNumber(number : Int) {
-        self.dimView.userInteractionEnabled = true
+    func uploadSuccessfulWithNumber(_ number : Int) {
+        self.dimView.isUserInteractionEnabled = true
         let bgImage = UIImageFromColor(self.primaryColor)
-        cancelButton.setBackgroundImage(bgImage, forState: UIControlState.Normal)
-        self.cancelButton.setTitle("Done", forState: .Normal)
-        self.cancelButton.enabled = true
+        cancelButton.setBackgroundImage(bgImage, for: UIControlState())
+        self.cancelButton.setTitle("Done", for: UIControlState())
+        self.cancelButton.isEnabled = true
         self.cancelButton.layoutIfNeeded()
 
         for inputView in inputViews {
@@ -377,87 +377,125 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         }
         
         loadingIndicator.stopAnimating()
-        self.submitButton.enabled = true
+        self.submitButton.isEnabled = true
         self.progressStatusLabel.text = "Uploaded successfully with ID \(number)."
         
         let constraint = Constraint.PinTopToBottom(self.cancelButton, toView: self.topLabel, margin: 80)
         constraint.priority = 1000
         self.containerView.addConstraint(constraint)
 
-        UIView.animateWithDuration(0.4) {
+        UIView.animate(withDuration: 0.4, animations: {
             self.view.layoutIfNeeded()
+        }) 
+    }
+    func className(object : AnyObject) -> String {
+        return NSStringFromClass(type(of: object)) ?? ""
+    }
+    
+    func recurse(object : AnyObject) {
+        if let dict = object as? NSDictionary {
+            print("{")
+            for (key, val) in dict {
+                if let key = key as? String {
+                    print(key + ":" + className(object: key as AnyObject) + "=" + className(object : val as AnyObject))
+                } else {
+                    print(className(object : key as AnyObject) + "=" + className(object : val as AnyObject))
+                }
+                
+                recurse(object: val as AnyObject)
+            }
+            print("}")
+        } else if let array = object as? NSArray {
+            print("[")
+            for val in array {
+                print(className(object : val as AnyObject))
+                recurse(object: val as AnyObject)
+            }
+
+
+            print("]")
+        } else {
+            
         }
+    }
+    
+    func labelValueDict(label : String, value : String) -> NSDictionary {
+        return [
+            label as String : value as String
+        ] as NSDictionary
     }
     
     func upload() {
         self.progressView.alpha = 0.0
-        self.containerView.bringSubviewToFront(self.progressView)
-        self.progressView.hidden = false
+        self.containerView.bringSubview(toFront: self.progressView)
+        self.progressView.isHidden = false
         
-        self.submitButton.enabled = false
-        self.cancelButton.enabled = false
+        self.submitButton.isEnabled = false
+        self.cancelButton.isEnabled = false
         
-        var request = NSMutableURLRequest(URL: NSURL(string: "https://www.logtape.io:443/api/issues")!)
-        let base64Data = ("issues:" + self.apiKey).dataUsingEncoding(NSUTF8StringEncoding)
-        let authString = base64Data?.base64EncodedStringWithOptions([]) ?? ""
-        var body = [String : AnyObject]()
+        var request = NSMutableURLRequest(url: URL(string: "https://www.logtape.io:443/api/issues")!)
+        let base64Data = ("issues:" + self.apiKey).data(using: String.Encoding.utf8)
+        let authString = base64Data?.base64EncodedString(options: []) ?? ""
+        var body = NSMutableDictionary()
         var properties = NSMutableArray()
 
-        if let image = self.image, pngImage = UIImagePNGRepresentation(image)
+        if let image = self.image, let pngImage = UIImagePNGRepresentation(image)
         {
-            let imageData = pngImage.base64EncodedStringWithOptions([])
-            body["images"] = [ imageData ]
+            let imageData = pngImage.base64EncodedString(options: []) as NSString
+            let images = NSArray(array : [imageData])
+            body["images"] = images
         }
 
         if self.hasPlaceholderText {
-            body["title"] = ""
+            body["title"] = NSString()
         } else {
-            body["title"] = self.descriptionView.text
+            body["title"] = NSString(string : self.descriptionView.text ?? "")
         }
         
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Basic \(authString)", forHTTPHeaderField: "Authorization")
         
-        var bundle = NSBundle.mainBundle()
+        var bundle = Bundle.main
         
         if let releaseVersionnumber = bundle.infoDictionary?["CFBundleShortVersionString"] as? String {
-            properties.addObject(["label" : "App version", "value" : releaseVersionnumber])
+            properties.add(labelValueDict(label: "App version", value: releaseVersionnumber))
         }
         
         if let buildVersionnumber = bundle.infoDictionary?["CFBundleVersion"] as? String {
-            properties.addObject(["label" : "Build", "value" : buildVersionnumber])
+            properties.add(labelValueDict(label: "Build", value: buildVersionnumber))
         }
         
-        let device = UIDevice.currentDevice()
-        properties.addObject(["label" : "Device type", "value" : device.model])
-        properties.addObject(["label" : "OS Version", "value" : "\(device.systemName) \(device.systemVersion)"])
-        properties.addObject(["label" : "Description", "value" : self.descriptionView.text])
+        let device = UIDevice.current
+        properties.add(labelValueDict(label: "Device type", value: device.model))
+        properties.add(labelValueDict(label: "OS Version", value: "\(device.systemName) \(device.systemVersion)"))
+        properties.add(labelValueDict(label: "Description", value: self.descriptionView.text))
         
-        let eventsArray : NSArray = LogTape.Events.map { $0.toDictionary() }
+        let eventsArray = LogTape.Events.map { $0.toDictionary() } as NSArray
         body["events"] = eventsArray
-        body["timestamp"] = LogEvent.currentTimeAsUTCString()
+        body["timestamp"] = LogEvent.currentTimeAsUTCString() as NSString
         body["properties"] = properties
+
+        recurse(object: body as AnyObject)
+        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: [])
         
-        let jsonData = try? NSJSONSerialization.dataWithJSONObject(body, options: [])
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+        self.dimView.isUserInteractionEnabled = false
         
-        request.HTTPMethod = "POST"
-        request.HTTPBody = jsonData
-        self.dimView.userInteractionEnabled = false
-        
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { (data, response, error) in
-            dispatch_async(dispatch_get_main_queue(), { 
+        let task = URLSession.shared.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) in
+            DispatchQueue.main.async(execute: { 
                 if let error = error {
                     self.uploadFailed()
                 } else {
                     
-                    if let data = data, jsonStr = String(data: data, encoding: NSUTF8StringEncoding) {
+                    if let data = data, let jsonStr = String(data: data, encoding: String.Encoding.utf8) {
                         print(jsonStr)
                     }
                     
                     if let data = data,
-                        dict = try? NSJSONSerialization.JSONObjectWithData(data, options: []),
-                        issueNumber = dict["issueNumber"] as? Int,
-                        response = response as? NSHTTPURLResponse where (response.statusCode / 100) == 2
+                        let dict = (try? JSONSerialization.jsonObject(with: data, options: [])) as? NSDictionary,
+                        let issueNumber = dict["issueNumber"] as? Int,
+                        let response = response as? HTTPURLResponse , (response.statusCode / 100) == 2
                     {
                         self.uploadSuccessfulWithNumber(issueNumber)
                     } else {
@@ -465,13 +503,13 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
                     }
                 }
             })
-        }
+        }) 
         
         task.resume()
         
-        UIView.animateWithDuration(0.3) { 
+        UIView.animate(withDuration: 0.3, animations: { 
             self.progressView.alpha = 1.0
-        }
+        }) 
     }
 
     func viewAttachments() {
@@ -490,9 +528,9 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         alert.show()
     }
     
-    func addLine(topView : UIView, margin : CGFloat) -> UIView {
+    func addLine(_ topView : UIView, margin : CGFloat) -> UIView {
         var lineView = UIView()
-        lineView.backgroundColor = self.borderColor.colorWithAlphaComponent(0.6)
+        lineView.backgroundColor = self.borderColor.withAlphaComponent(0.6)
         lineView.translatesAutoresizingMaskIntoConstraints = false
         self.containerView.addSubview(lineView)
 
@@ -500,29 +538,29 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
             Constraint.PinLeft(lineView, toView: containerView),
             Constraint.PinRight(lineView, toView: containerView),
             Constraint.PinTopToBottom(lineView, toView: topView, margin: margin),
-            Constraint.Height(lineView, height: 1.0 / UIScreen.mainScreen().scale)
+            Constraint.Height(lineView, height: 1.0 / UIScreen.main.scale)
             ])
         
         return lineView
     }
     
-    func loadImage(name: String) -> UIImage? {
-        let podBundle = NSBundle(forClass: LogTapeVC.self)
-        if let url = podBundle.URLForResource("LogTape", withExtension: "bundle") {
-            let bundle = NSBundle(URL: url)
-            return UIImage(named: name, inBundle: bundle, compatibleWithTraitCollection: nil)
+    func loadImage(_ name: String) -> UIImage? {
+        let podBundle = Bundle(for: LogTapeVC.self)
+        if let url = podBundle.url(forResource: "LogTape", withExtension: "bundle") {
+            let bundle = Bundle(url: url)
+            return UIImage(named: name, in: bundle, compatibleWith: nil)
         }
         return nil
     }
     
-    func addIconButton(title : String, icon : String, action : Selector, topView : UIView, leftView : UIView) -> UIView {
-        let button = CenteredButton(type: .Custom)
-        button.setImage(loadImage(icon), forState: .Normal)
+    func addIconButton(_ title : String, icon : String, action : Selector, topView : UIView, leftView : UIView) -> UIView {
+        let button = CenteredButton(type: .custom)
+        button.setImage(loadImage(icon), for: UIControlState())
         button.titleLabel?.font = UIFont(name: "Avenir-Light", size: 9.0)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(title, forState: .Normal)
-        button.setTitleColor(UIColor.darkGrayColor(), forState: .Normal)
-        button.addTarget(self, action: action, forControlEvents: .TouchUpInside)
+        button.setTitle(title, for: UIControlState())
+        button.setTitleColor(UIColor.darkGray, for: UIControlState())
+        button.addTarget(self, action: action, for: .touchUpInside)
 
         self.containerView.addSubview(button)
         self.containerView.addConstraints([
@@ -536,23 +574,23 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         return button
     }
     
-    func addButton(title : String, action : Selector, topView : UIView, isCancel : Bool) -> UIButton {
-        let button = UIButton(type: .Custom)
+    func addButton(_ title : String, action : Selector, topView : UIView, isCancel : Bool) -> UIButton {
+        let button = UIButton(type: .custom)
 
-        button.addTarget(self, action: action, forControlEvents: .TouchUpInside)
+        button.addTarget(self, action: action, for: .touchUpInside)
         button.titleLabel?.font = UIFont(name: "Avenir-Light", size: 15.0)
         let color : UIColor
         if isCancel {
-            color = UIColor.lightGrayColor()
+            color = UIColor.lightGray
         } else {
             color = self.primaryColor
         }
         
         let bgImage = UIImageFromColor(color)
-        button.setBackgroundImage(bgImage, forState: UIControlState.Normal)
+        button.setBackgroundImage(bgImage, for: UIControlState())
         button.clipsToBounds = true
         button.layer.cornerRadius = 5.0
-        button.setTitle(title, forState: .Normal)
+        button.setTitle(title, for: UIControlState())
         button.translatesAutoresizingMaskIntoConstraints = false
         self.containerView.addSubview(button)
         
@@ -568,7 +606,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         
         if isCancel {
             self.containerView.addConstraints([
-                NSLayoutConstraint(item: containerView, attribute: .Bottom, relatedBy: .Equal, toItem: button, attribute: .Bottom, multiplier: 1.0, constant: 10),
+                NSLayoutConstraint(item: containerView, attribute: .bottom, relatedBy: .equal, toItem: button, attribute: .bottom, multiplier: 1.0, constant: 10),
                 ])
         }
         
@@ -577,13 +615,13 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
 
     static var showing = false
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         LogTapeVC.showing = false
         super.viewDidDisappear(animated)
     }
     
     
-    static func topViewControllerWithRootViewController(rootVc : UIViewController?) -> UIViewController?
+    static func topViewControllerWithRootViewController(_ rootVc : UIViewController?) -> UIViewController?
     {
         if let tabBarController = rootVc as? UITabBarController {
             return self.topViewControllerWithRootViewController(tabBarController.selectedViewController)
@@ -597,53 +635,53 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
     }
     
     static func topViewController() -> UIViewController? {
-        return self.topViewControllerWithRootViewController(UIApplication.sharedApplication().keyWindow?.rootViewController)
+        return self.topViewControllerWithRootViewController(UIApplication.shared.keyWindow?.rootViewController)
     }
     
-    static func show(apiKey : String) {
-        if let topVc = LogTapeVC.topViewController(), window = UIApplication.sharedApplication().keyWindow where !LogTapeVC.showing {
+    static func show(_ apiKey : String) {
+        if let topVc = LogTapeVC.topViewController(), let window = UIApplication.shared.keyWindow , !LogTapeVC.showing {
             
-            UIGraphicsBeginImageContextWithOptions(window.bounds.size, false, UIScreen.mainScreen().scale)
-            window.drawViewHierarchyInRect(window.bounds, afterScreenUpdates: true)
+            UIGraphicsBeginImageContextWithOptions(window.bounds.size, false, UIScreen.main.scale)
+            window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
             let image = UIGraphicsGetImageFromCurrentImageContext();
-            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+            //UIImageWriteToSavedPhotosAlbum(image!, nil, nil, nil)
             UIGraphicsEndImageContext()
 
             let root = LogTapeVC()
             root.apiKey = apiKey
-            root.modalPresentationStyle = .Custom
+            root.modalPresentationStyle = .custom
             root.transitioningDelegate = root
             root.image = image
-            root.sourceDescription = topVc.navigationItem.title ?? NSStringFromClass(topVc.dynamicType).componentsSeparatedByString(".").last!
+            root.sourceDescription = topVc.navigationItem.title ?? NSStringFromClass(type(of: topVc)).components(separatedBy: ".").last!
             LogTapeVC.showing = true
-            topVc.presentViewController(root, animated: true, completion: nil)
+            topVc.present(root, animated: true, completion: nil)
         }
     }
     
     
-    func animationControllerForPresentedController(presented: UIViewController, presentingController presenting: UIViewController, sourceController source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         let animator = DialogTransitionAnimator()
         animator.presenting = true
         return animator
     }
     
-    func animationControllerForDismissedController(dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         let animator =  DialogTransitionAnimator()
         return animator
     }
     
     // MARK: UITextViewDelegate methods
-    func textViewDidEndEditing(textView: UITextView) {
+    func textViewDidEndEditing(_ textView: UITextView) {
         
         if textView.text == "" {
-            textView.textColor = UIColor.lightGrayColor()
+            textView.textColor = UIColor.lightGray
             textView.text = self.placeholderText
             self.hasPlaceholderText = true
         }
         
     }
     
-    func textViewDidBeginEditing(textView: UITextView) {
+    func textViewDidBeginEditing(_ textView: UITextView) {
         
         if self.hasPlaceholderText {
             textView.textColor = textColor

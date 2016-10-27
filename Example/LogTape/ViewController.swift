@@ -12,24 +12,24 @@ import AFNetworking
 import Alamofire
 
 class ViewController: UIViewController {
-    let sessionManager = AFURLSessionManager(sessionConfiguration: NSURLSessionConfiguration.defaultSessionConfiguration())
+    let sessionManager = AFURLSessionManager(sessionConfiguration: URLSessionConfiguration.default)
 
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         LogTape.Log("Entered view controller")
         LogTape.LogObject(["Test" : "1234"], message: "Test object")
 
-        let url = NSURL(string: "https://httpbin.org/get?from=afnetworking")!
+        let url = URL(string: "https://httpbin.org/get?from=afnetworking")!
 
         // Test AFNetworking request
-        let task = sessionManager.dataTaskWithRequest(NSURLRequest(URL: url)) { (response, object, error) in
+        let task = sessionManager.dataTask(with: URLRequest(url: url)) { (response, object, error) in
             print(object)
         }
         
         task.resume()
         
         // Test alamofire request
-        Alamofire.request(.GET, "https://httpbin.org/get", parameters: ["from": "alamofire"])
+        Alamofire.request("https://httpbin.org/get", parameters: ["from": "alamofire"])
             .responseJSON { response in
                 print(response.request)  // original URL request
                 print(response.response) // URL response

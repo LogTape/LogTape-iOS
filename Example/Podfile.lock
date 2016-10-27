@@ -14,7 +14,7 @@ PODS:
   - AFNetworking/Serialization (3.1.0)
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
-  - Alamofire (3.4.0)
+  - Alamofire (4.0.1)
   - LogTape (0.1.0)
   - LogTape+AFNetworking (0.1.0):
     - AFNetworking
@@ -25,7 +25,7 @@ PODS:
 
 DEPENDENCIES:
   - AFNetworking
-  - Alamofire
+  - Alamofire (~> 4.0.1)
   - LogTape (from `../`)
   - LogTape+AFNetworking (from `../`)
   - LogTape+Alamofire (from `../`)
@@ -40,11 +40,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
-  Alamofire: c19a627cefd6a95f840401c49ab1f124e07f54ee
+  Alamofire: 7682d43245de14874acd142ec137b144aa1dd335
   LogTape: 34dd6e6b9c53310c8eeed57a71b0bd613e6128fc
-  LogTape+AFNetworking: 74bca2ea6fa0de52bae67e560342be36c5aee684
-  LogTape+Alamofire: 38d4838a8d61b012bf0a15c01e3cd78de2e1ffd3
+  LogTape+AFNetworking: b8a9ffc87f61a2d656ad8974199712b692046eb3
+  LogTape+Alamofire: d0c3e5c1e342aa3ed7db955116a4998b96aed164
 
-PODFILE CHECKSUM: 4325a141d0ea0f9b7e8f4833c1d2954db477f266
+PODFILE CHECKSUM: 024bd9aae9f5229f7e5c4052bd9f9c56aac42690
 
-COCOAPODS: 1.0.1
+COCOAPODS: 1.1.1

@@ -9,67 +9,67 @@
 import UIKit
 
 class Constraint {
-    static func EqualWidth(view : UIView, toView : UIView, margin : CGFloat = 0.0, multiplier : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Width, relatedBy: .Equal, toItem: toView, attribute: .Width, multiplier: multiplier, constant: margin)
+    static func EqualWidth(_ view : UIView, toView : UIView, margin : CGFloat = 0.0, multiplier : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .width, relatedBy: .equal, toItem: toView, attribute: .width, multiplier: multiplier, constant: margin)
     }
     
-    static func EqualHeight(view : UIView, toView : UIView, margin : CGFloat = 0.0, multiplier : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Height, relatedBy: .Equal, toItem: toView, attribute: .Height, multiplier: multiplier, constant: margin)
+    static func EqualHeight(_ view : UIView, toView : UIView, margin : CGFloat = 0.0, multiplier : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: toView, attribute: .height, multiplier: multiplier, constant: margin)
     }
     
-    static func PinLeft(view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Left, relatedBy: .Equal, toItem: toView, attribute: .Left, multiplier: 1.0, constant: margin)
+    static func PinLeft(_ view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .left, relatedBy: .equal, toItem: toView, attribute: .left, multiplier: 1.0, constant: margin)
     }
 
-    static func PinLeftToRight(view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Left, relatedBy: .Equal, toItem: toView, attribute: .Right, multiplier: 1.0, constant: margin)
+    static func PinLeftToRight(_ view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .left, relatedBy: .equal, toItem: toView, attribute: .right, multiplier: 1.0, constant: margin)
     }
     
-    static func PinRight(view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Right, relatedBy: .Equal, toItem: toView, attribute: .Right, multiplier: 1.0, constant: -margin)
+    static func PinRight(_ view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .right, relatedBy: .equal, toItem: toView, attribute: .right, multiplier: 1.0, constant: -margin)
     }
     
-    static func PinRightToLeft(view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Right, relatedBy: .Equal, toItem: toView, attribute: .Left, multiplier: 1.0, constant: -margin)
+    static func PinRightToLeft(_ view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .right, relatedBy: .equal, toItem: toView, attribute: .left, multiplier: 1.0, constant: -margin)
     }
     
-    static func PinTop(view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Top, relatedBy: .Equal, toItem: toView, attribute: .Top, multiplier: 1.0, constant: margin)
+    static func PinTop(_ view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .top, relatedBy: .equal, toItem: toView, attribute: .top, multiplier: 1.0, constant: margin)
     }
     
-    static func PinTopToBottom(view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Top, relatedBy: .Equal, toItem: toView, attribute: .Bottom, multiplier: 1.0, constant: margin)
+    static func PinTopToBottom(_ view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .top, relatedBy: .equal, toItem: toView, attribute: .bottom, multiplier: 1.0, constant: margin)
     }
 
-    static func PinBottomToTop(view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Bottom, relatedBy: .Equal, toItem: toView, attribute: .Top, multiplier: 1.0, constant: margin)
+    static func PinBottomToTop(_ view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .bottom, relatedBy: .equal, toItem: toView, attribute: .top, multiplier: 1.0, constant: margin)
     }
 
-    static func PinBottom(view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Bottom, relatedBy: .Equal, toItem: toView, attribute: .Bottom, multiplier: 1.0, constant: -margin)
+    static func PinBottom(_ view : UIView, toView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .bottom, relatedBy: .equal, toItem: toView, attribute: .bottom, multiplier: 1.0, constant: -margin)
     }
     
-    static func PinCenterX(view : UIView, inView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .CenterX, relatedBy: .Equal, toItem: inView, attribute: .CenterX, multiplier: 1.0, constant: margin)
+    static func PinCenterX(_ view : UIView, inView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .centerX, relatedBy: .equal, toItem: inView, attribute: .centerX, multiplier: 1.0, constant: margin)
     }
     
-    static func PinCenterY(view : UIView, inView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .CenterY, relatedBy: .Equal, toItem: inView, attribute: .CenterY, multiplier: 1.0, constant: margin)
+    static func PinCenterY(_ view : UIView, inView : UIView, margin : CGFloat = 0.0) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .centerY, relatedBy: .equal, toItem: inView, attribute: .centerY, multiplier: 1.0, constant: margin)
     }
     
-    static func Width(view : UIView, width : CGFloat) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Width, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1.0, constant: width)
+    static func Width(_ view : UIView, width : CGFloat) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: width)
     }
     
-    static func AspectWidth(view : UIView, aspect : CGFloat) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Width, relatedBy: .Equal, toItem: view, attribute: .Height, multiplier: aspect, constant: 0.0)
+    static func AspectWidth(_ view : UIView, aspect : CGFloat) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .width, relatedBy: .equal, toItem: view, attribute: .height, multiplier: aspect, constant: 0.0)
     }
     
-    static func AspectHeight(view : UIView, aspect : CGFloat) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Height, relatedBy: .Equal, toItem: view, attribute: .Width, multiplier: aspect, constant: 0.0)
+    static func AspectHeight(_ view : UIView, aspect : CGFloat) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: view, attribute: .width, multiplier: aspect, constant: 0.0)
     }
     
-    static func Height(view : UIView, height : CGFloat) -> NSLayoutConstraint {
-        return NSLayoutConstraint(item: view, attribute: .Height, relatedBy: .Equal, toItem: nil, attribute: .NotAnAttribute, multiplier: 1.0, constant: height)
+    static func Height(_ view : UIView, height : CGFloat) -> NSLayoutConstraint {
+        return NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: height)
     }
 }

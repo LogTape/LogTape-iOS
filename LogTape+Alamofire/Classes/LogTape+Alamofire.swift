@@ -3,22 +3,22 @@ import LogTape
 import Alamofire
 
 struct WeakManagerRef {
-    weak var manager : Manager? = nil
+    weak var manager : SessionManager? = nil
 }
 
 class LogTapeAlamofire {
-    static private var instance = LogTapeAlamofire()
+    static fileprivate var instance = LogTapeAlamofire()
     var managers = [WeakManagerRef]()
 
-    func addManager(manager : Manager) {
+    func addManager(_ manager : SessionManager) {
         self.managers.append(WeakManagerRef(manager: manager))
     }
     
-    func removeManager(manager : Manager) {
+    func removeManager(_ manager : SessionManager) {
         self.managers = self.managers.filter { $0.manager != nil && $0.manager !== manager }
     }
 
-    public static func startLoggingWithManager(manager : Manager) {
+    open static func startLoggingWithManager(_ manager : SessionManager) {
         let initialCount = self.instance.managers.count
         
         self.instance.removeManager(manager)
@@ -29,7 +29,7 @@ class LogTapeAlamofire {
         }
     }
 
-    public static func stopLoggingWithManager(manager : Manager) {
+    open static func stopLoggingWithManager(_ manager : SessionManager) {
         self.instance.removeManager(manager)
         
         if self.instance.managers.count == 0 {
@@ -40,18 +40,18 @@ class LogTapeAlamofire {
     func registerListeners() {
         self.unregisterListeners()
 
-        NSNotificationCenter.defaultCenter().addObserverForName(Notifications.Task.DidResume, object: nil, queue: nil) { [weak self] (notification) in
+        NotificationCenter.default.addObserver(forName : Notification.Name.Task.DidResume, object: nil, queue: nil) { [weak self] (notification) in
             self?.networkRequestDidStart(notification)
         }
         
-        NSNotificationCenter.defaultCenter().addObserverForName(Notifications.Task.DidComplete, object: nil, queue: nil) { [weak self] (notification) in
+        NotificationCenter.default.addObserver(forName : Notification.Name.Task.DidComplete, object: nil, queue: nil) { [weak self] (notification) in
             self?.networkRequestDidFinish(notification)
         }
     }
     
-    func delegateFromTask(task : NSURLSessionTask) -> Request.TaskDelegate? {
+    func delegateFromTask(_ task : URLSessionTask) -> TaskDelegate? {
         for manager in self.managers {
-            if let manager = manager.manager, delegate = manager.delegate[task] {
+            if let manager = manager.manager, let delegate = manager.delegate[task]?.delegate {
                 return delegate
             }
         }
@@ -60,50 +60,50 @@ class LogTapeAlamofire {
     }
     
     
-    func networkRequestDidStart(notification : NSNotification) {
-        guard let task = notification.object as? NSURLSessionTask, _ = self.delegateFromTask(task) else {
+    func networkRequestDidStart(_ notification : Notification) {
+        guard let task = notification.object as? URLSessionTask, let _ = self.delegateFromTask(task) else {
             return
         }
         
         LogTape.LogURLSessionTaskStart(task)
     }
     
-    func networkRequestDidFinish(notification : NSNotification) {
-        guard let task = notification.object as? NSURLSessionTask,
-            delegate = self.delegateFromTask(task)
+    func networkRequestDidFinish(_ notification : Notification) {
+        guard let task = notification.object as? URLSessionTask,
+            let delegate = self.delegateFromTask(task)
             else
         {
             return
         }
 
         var error = task.error
-        var data : NSData? = nil
+        var data : Data? = nil
 
         // Ugly hack to access private data member in TaskDelegate - I prefer
         // it to swizzling methods though, less chance of messing up internal
         // workings
-        if delegate.respondsToSelector("data") {
-            let res = delegate.performSelector("data")
-            
-            if let afData = res.takeUnretainedValue() as? NSMutableData {
-                data = NSData(data: afData)
+        if delegate.responds(to: "data") {
+            let res = delegate.perform("data")
+       
+            if let afData = res?.takeUnretainedValue() as? NSMutableData {
+                data = afData.copy() as! Data
             }
         }
         
-        LogTape.LogURLSessionTaskFinish(task, data : data, error: error)
+        LogTape.LogURLSessionTaskFinish(task, data : data, error: error as NSError?)
     }
     
     func unregisterListeners() {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
 extension LogTape {
-    public static func enableAlamofireLogging(manager : Manager = Manager.sharedInstance) {
+    public static func enableAlamofireLogging(_ manager : SessionManager = SessionManager.default) {
         LogTapeAlamofire.startLoggingWithManager(manager)
     }
     
-    public static func disableAlamofireLogging(manager : Manager = Manager.sharedInstance) {
+    public static func disableAlamofireLogging(_ manager : SessionManager = SessionManager.default) {
         LogTapeAlamofire.stopLoggingWithManager(manager)
     }
 }

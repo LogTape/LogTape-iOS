@@ -2,56 +2,55 @@ import UIKit
 import LogTape
 import AFNetworking
 
-public class LogTapeAFNetworking {
-    static private var instance = LogTapeAFNetworking()
+open class LogTapeAFNetworking {
+    static fileprivate var instance = LogTapeAFNetworking()
     
-    public static func startLogging() {
+    open static func startLogging() {
         self.instance.registerListeners()
     }
 
-    public static func stopLogging() {
+    open static func stopLogging() {
         self.instance.unregisterListeners()
     }
     
     func registerListeners() {
         self.unregisterListeners()
         
-        NSNotificationCenter.defaultCenter().addObserverForName(AFNetworkingTaskDidResumeNotification, object: nil, queue: nil) { [weak self] (notification) in
+        NotificationCenter.default.addObserver(forName: NSNotification.Name.AFNetworkingTaskDidResume, object: nil, queue: nil) { [weak self] (notification) in
             self?.networkRequestDidStart(notification)
         }
         
-        NSNotificationCenter.defaultCenter().addObserverForName(AFNetworkingTaskDidCompleteNotification, object: nil, queue: nil) { [weak self] (notification) in
+        NotificationCenter.default.addObserver(forName: NSNotification.Name.AFNetworkingTaskDidComplete, object: nil, queue: nil) { [weak self] (notification) in
             self?.networkRequestDidFinish(notification)
         }
     }
     
     
-    func networkRequestDidStart(notification : NSNotification) {
-        guard let task = notification.object as? NSURLSessionTask else {
+    func networkRequestDidStart(_ notification : Notification) {
+        guard let task = notification.object as? URLSessionTask else {
             return
         }
-        
         LogTape.LogURLSessionTaskStart(task)
     }
     
-    func networkRequestDidFinish(notification : NSNotification) {
-        guard let task = notification.object as? NSURLSessionTask else {
+    func networkRequestDidFinish(_ notification : Notification) {
+        guard let task = notification.object as? URLSessionTask else {
             return
         }
         
         var error = task.error
-        var data : NSData? = nil
+        var data : Data? = nil
 
-        if let userInfo = notification.userInfo where error == nil {
+        if let userInfo = (notification as NSNotification).userInfo , error == nil {
             error = userInfo[AFNetworkingTaskDidCompleteErrorKey] as? NSError
-            data = userInfo[AFNetworkingTaskDidCompleteResponseDataKey] as? NSData
+            data = userInfo[AFNetworkingTaskDidCompleteResponseDataKey] as? Data
         }
         
-        LogTape.LogURLSessionTaskFinish(task, data : data, error: error)
+        LogTape.LogURLSessionTaskFinish(task, data : data, error: error as NSError?)
     }
     
     func unregisterListeners() {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
 }
 

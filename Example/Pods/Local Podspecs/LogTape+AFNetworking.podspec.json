@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "summary": "A short description of LogTape.",
   "description": "TODO: Add long description of the pod here.",
-  "homepage": "https://github.com/<GITHUB_USERNAME>/LogTape",
+  "homepage": "https://github.com/LogTape/LogTape-iOS",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -12,11 +12,10 @@
     "Dan Nilsson": "dan@binarypeak.se"
   },
   "source": {
-    "git": "https://github.com/<GITHUB_USERNAME>/LogTape.git",
-    "tag": "0.1.0"
+    "git": "https://github.com/LogTape/LogTape-iOS.git"
   },
   "platforms": {
-    "ios": "8.0"
+    "ios": "9.0"
   },
   "source_files": "LogTape+AFNetworking/Classes/**/*",
   "dependencies": {

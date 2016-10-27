@@ -26,7 +26,7 @@ TODO: Add long description of the pod here.
   s.author           = { 'Dan Nilsson' => 'dan@binarypeak.se' }
   s.source           = { :git => 'https://github.com/LogTape/LogTape-iOS.git' }
 
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '9.0'
 
   s.source_files = 'LogTape+AFNetworking/Classes/**/*'
   s.dependency 'LogTape'
