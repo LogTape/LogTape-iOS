@@ -52,10 +52,8 @@ class ViewController: UIViewController {
             }
         }
         
-        if let manualTask = manualTask {
-            LogTape.LogURLSessionTaskStart(manualTask)
-            manualTask.resume()
-        }
+        LogTape.LogURLSessionTaskStart(manualTask!)
+        manualTask!.resume()
     }
 }
 
