@@ -60,8 +60,12 @@ class LogTapeAlamofire {
     }
     
     
-    func networkRequestDidStart(_ notification : Notification) {
-        guard let task = notification.object as? URLSessionTask, let _ = self.delegateFromTask(task) else {
+    func networkRequestDidStart(_ notification : Notification) {        
+        guard let userInfo = notification.userInfo,
+            let task = userInfo[Notification.Key.Task] as? URLSessionTask,
+            let _ = self.delegateFromTask(task)
+            else
+        {
             return
         }
         
@@ -69,13 +73,17 @@ class LogTapeAlamofire {
     }
     
     func networkRequestDidFinish(_ notification : Notification) {
-        guard let task = notification.object as? URLSessionTask,
+        
+        let obj = notification.object as? URLSessionTask
+        
+        guard let userInfo = notification.userInfo,
+            let task = userInfo[Notification.Key.Task] as? URLSessionTask,
             let delegate = self.delegateFromTask(task)
             else
         {
             return
         }
-
+        
         var error = task.error
         var data : Data? = nil
 
@@ -85,7 +93,7 @@ class LogTapeAlamofire {
         if delegate.responds(to: "data") {
             let res = delegate.perform("data")
        
-            if let afData = res?.takeUnretainedValue() as? NSMutableData {
+            if let afData = res?.takeUnretainedValue() as? NSData {
                 data = afData.copy() as! Data
             }
         }
