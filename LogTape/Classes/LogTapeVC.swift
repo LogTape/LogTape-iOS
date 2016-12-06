@@ -419,12 +419,6 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         }
     }
     
-    func labelValueDict(label : String, value : String) -> NSDictionary {
-        return [
-            label as String : value as String
-        ] as NSDictionary
-    }
-    
     func upload() {
         self.progressView.alpha = 0.0
         self.containerView.bringSubview(toFront: self.progressView)
@@ -437,7 +431,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         let base64Data = ("issues:" + self.apiKey).data(using: String.Encoding.utf8)
         let authString = base64Data?.base64EncodedString(options: []) ?? ""
         var body = NSMutableDictionary()
-        var properties = NSMutableArray()
+        var properties = NSMutableDictionary()
 
         if let image = self.image, let pngImage = UIImagePNGRepresentation(image)
         {
@@ -458,17 +452,17 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         var bundle = Bundle.main
         
         if let releaseVersionnumber = bundle.infoDictionary?["CFBundleShortVersionString"] as? String {
-            properties.add(labelValueDict(label: "App version", value: releaseVersionnumber))
+            properties["App version"] = releaseVersionnumber
         }
         
-        if let buildVersionnumber = bundle.infoDictionary?["CFBundleVersion"] as? String {
-            properties.add(labelValueDict(label: "Build", value: buildVersionnumber))
+        if let buildVersionNumber = bundle.infoDictionary?["CFBundleVersion"] as? String {
+            properties["Build"] = buildVersionNumber
         }
         
         let device = UIDevice.current
-        properties.add(labelValueDict(label: "Device type", value: device.model))
-        properties.add(labelValueDict(label: "OS Version", value: "\(device.systemName) \(device.systemVersion)"))
-        properties.add(labelValueDict(label: "Description", value: self.descriptionView.text))
+        properties["Device type"] = device.model
+        properties["OS Version"] = "\(device.systemName) \(device.systemVersion)"
+        properties["Description"] = self.descriptionView.text
         
         let eventsArray = LogTape.Events.map { $0.toDictionary() } as NSArray
         body["events"] = eventsArray
