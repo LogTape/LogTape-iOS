@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        LogTape.start("5f559afc-6248-4e90-b9d0-d185e7a9f0d0")
+        LogTape.start("ENTER_API_KEY_HERE")
         LogTape.enableAFNetworkLogging()
         LogTape.enableAlamofireLogging()
         
