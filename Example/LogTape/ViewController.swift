@@ -40,20 +40,17 @@ class ViewController: UIViewController {
                     print("JSON: \(JSON)")
                 }
         }
-        let manualUrl = URL(string: "https://httpbin.org/get?from=urlsession")!
 
         // Test manual request
-        var manualTask : URLSessionTask? = nil
+        var manualTask : URLSessionTask! = nil
         
-        manualTask = URLSession.shared.dataTask(with: manualUrl as URL) {
+        manualTask = URLSession.shared.dataTask(with: URL(string: "https://httpbin.org/get?from=urlsession")!) {
             data, response, error in
-            if let manualTask = manualTask {
-                LogTape.LogURLSessionTaskFinish(manualTask, data: data, error: error as? NSError)
-            }
+            LogTape.LogURLSessionTaskFinish(manualTask, data: data, error: error as? NSError)
         }
         
-        LogTape.LogURLSessionTaskStart(manualTask!)
-        manualTask!.resume()
+        LogTape.LogURLSessionTaskStart(manualTask)
+        manualTask.resume()
     }
 }
 
