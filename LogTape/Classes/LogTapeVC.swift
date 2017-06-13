@@ -263,6 +263,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         progressStatusLabel.text = "Uploading.."
         progressStatusLabel.textAlignment = .center
         progressStatusLabel.textColor = textColor
+        progressStatusLabel.numberOfLines = 0
         
         self.containerView.addSubview(self.helpLabel)
         self.containerView.addConstraints([
@@ -278,7 +279,14 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         
         button = self.addIconButton("Add screenshot", icon: "camera_icon", action: #selector(LogTapeVC.addScreenshot), topView: line, leftView: button)
         inputViews.append(button)
-        button = self.addIconButton("1 attachment", icon: "paperclip_icon", action: #selector(LogTapeVC.viewAttachments), topView: line, leftView: button)
+        
+        var numAttachments = 1 + (LogTape.instance?.attachedScreenshots.count ?? 0)
+        
+        if (LogTape.VideoRecorder?.duration() ?? 0.0) > 0.0 {
+            numAttachments += 1
+        }
+        
+        button = self.addIconButton(numAttachments == 1 ? "1 attachment" : "\(numAttachments) attachments", icon: "paperclip_icon", action: #selector(LogTapeVC.viewAttachments), topView: line, leftView: button)
         inputViews.append(button)
         
         line = self.addLine(button, margin : 5.0)
@@ -333,6 +341,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         }
 
         let nav = UINavigationController(rootViewController: drawVc)
+        nav.navigationBar.tintColor = self.primaryColor
         self.present(nav, animated: true, completion: nil)
     }
 
@@ -341,6 +350,8 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
     }
     
     func cancel() {
+        LogTape.instance?.attachedScreenshots = []
+        LogTape.VideoRecorder?.clear()
         self.presentingViewController?.dismiss(animated: true, completion: nil)
     }
     
@@ -364,7 +375,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         }) 
     }
     
-    func uploadSuccessfulWithNumber(_ number : Int) {
+    func uploadSuccessfulWithNumber(_ number : Int, deletedIssueNumber : Int?) {
         self.dimView.isUserInteractionEnabled = true
         let bgImage = UIImageFromColor(self.primaryColor)
         cancelButton.setBackgroundImage(bgImage, for: UIControlState())
@@ -378,7 +389,14 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         
         loadingIndicator.stopAnimating()
         self.submitButton.isEnabled = true
-        self.progressStatusLabel.text = "Uploaded successfully with ID \(number)."
+        
+        var extraInfo = ""
+        
+        if let deletedIssueNumber = deletedIssueNumber {
+            extraInfo = "\nDeleted issue with ID \(deletedIssueNumber) to make room (oldest issue)."
+        }
+        
+        self.progressStatusLabel.text = "Uploaded successfully with ID \(number)." + extraInfo
         
         let constraint = Constraint.PinTopToBottom(self.cancelButton, toView: self.topLabel, margin: 80)
         constraint.priority = 1000
@@ -418,8 +436,10 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
             
         }
     }
-    
+
     func upload() {
+
+        
         self.progressView.alpha = 0.0
         self.containerView.bringSubview(toFront: self.progressView)
         self.progressView.isHidden = false
@@ -427,7 +447,9 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         self.submitButton.isEnabled = false
         self.cancelButton.isEnabled = false
         
-        var request = NSMutableURLRequest(url: URL(string: "https://www.logtape.io:443/api/issues")!)
+        var request = NSMutableURLRequest(url: URL(string: "https://www.logtape.io/api/issues")!)
+
+
         let base64Data = ("issues:" + self.apiKey).data(using: String.Encoding.utf8)
         let authString = base64Data?.base64EncodedString(options: []) ?? ""
         var body = NSMutableDictionary()
@@ -470,15 +492,36 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         body["properties"] = properties
 
         recurse(object: body as AnyObject)
-        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: [])
-        
-        request.httpMethod = "POST"
-        request.httpBody = jsonData
+               request.httpMethod = "POST"
         self.dimView.isUserInteractionEnabled = false
         
+        if let recorder = LogTape.VideoRecorder, recorder.duration() > 0.0 {
+            recorder.writeToFile({ (path) in
+                
+                if let moviePath = path, let movieData = try? Data(contentsOf: URL(fileURLWithPath: moviePath))
+                {
+                    let movieBase64Str = movieData.base64EncodedString(options: NSData.Base64EncodingOptions.lineLength64Characters)
+                    body["movies"] = [movieBase64Str]
+                }
+                self.uploadWithRequest(request: request,
+                                       body : body)
+            })
+        } else {
+            self.uploadWithRequest(request: request, body : body)
+        }
+
+        UIView.animate(withDuration: 0.3, animations: {
+            self.progressView.alpha = 1.0
+        })
+    }
+    
+    func uploadWithRequest(request : NSMutableURLRequest, body : NSMutableDictionary) {
+        let jsonData = try? JSONSerialization.data(withJSONObject: body, options: [])
+        request.httpBody = jsonData
+
         let task = URLSession.shared.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) in
-            DispatchQueue.main.async(execute: { 
-                if let error = error {
+            DispatchQueue.main.async(execute: {
+                if let _ = error {
                     self.uploadFailed()
                 } else {
                     
@@ -491,39 +534,56 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
                         let issueNumber = dict["issueNumber"] as? Int,
                         let response = response as? HTTPURLResponse , (response.statusCode / 100) == 2
                     {
-                        self.uploadSuccessfulWithNumber(issueNumber)
+                        let deletedIssueNumber = dict["deletedIssueNumber"] as? Int
+                        
+                        self.uploadSuccessfulWithNumber(issueNumber, deletedIssueNumber : deletedIssueNumber)
                     } else {
                         self.uploadFailed()
                     }
                 }
             })
-        }) 
+        })
         
         task.resume()
-        
-        UIView.animate(withDuration: 0.3, animations: { 
-            self.progressView.alpha = 1.0
-        }) 
     }
-
+    
     func viewAttachments() {
-        let alert = UIAlertView(title: "Info", message: "Sorry, not implemented yet!", delegate: nil, cancelButtonTitle: "OK")
+        let numImages = 1 + (LogTape.instance?.attachedScreenshots.count ?? 0)
+        
+        var infoStr = numImages == 1 ? "You have 1 image attached" : "You have \(numImages) images attached"
+        
+        if ((LogTape.instance?.videoRecorder.duration() ?? 0.0) != 0.0) {
+            infoStr += " and 1 movie."
+        } else {
+            infoStr += "."
+        }
+
+        infoStr += " Cancel upload dialog to clear attachments."
+
+        let alert = UIAlertView(title: "Info", message: infoStr, delegate: nil, cancelButtonTitle: "OK")
+
         alert.show()
     }
     
     func addScreenshot() {
-        let alert = UIAlertView(title: "Info", message: "Sorry, not implemented yet!", delegate: nil, cancelButtonTitle: "OK")
-        alert.show()
+        if let image = self.image, let instance = LogTape.instance {
+            instance.attachedScreenshots.append(image)
+        }
+
+        self.presentingViewController?.dismiss(animated: true, completion: {
+            
+        })
     }
+
 
     func recordVideo() {
-        let alert = UIAlertView(title: "Info", message: "Sorry, not implemented yet!", delegate: nil, cancelButtonTitle: "OK")
-
-        alert.show()
+        self.presentingViewController?.dismiss(animated: true, completion: { 
+            LogTape.VideoRecorder?.start()
+        })
     }
-    
+
     func addLine(_ topView : UIView, margin : CGFloat) -> UIView {
-        var lineView = UIView()
+        let lineView = UIView()
         lineView.backgroundColor = self.borderColor.withAlphaComponent(0.6)
         lineView.translatesAutoresizingMaskIntoConstraints = false
         self.containerView.addSubview(lineView)

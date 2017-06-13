@@ -3,7 +3,7 @@ use_frameworks!
 
 target 'LogTape_Example' do
   pod 'AFNetworking'
-  pod 'Alamofire', '~> 4.0.1'
+  pod 'Alamofire'
   pod 'LogTape', :path => '../'
   pod 'LogTape+AFNetworking', :path => '../'
   pod 'LogTape+Alamofire', :path => '../'

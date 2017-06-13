@@ -90,8 +90,8 @@ class LogTapeAlamofire {
         // Ugly hack to access private data member in TaskDelegate - I prefer
         // it to swizzling methods though, less chance of messing up internal
         // workings
-        if delegate.responds(to: "data") {
-            let res = delegate.perform("data")
+        if delegate.responds(to: Selector("data")) {
+            let res = delegate.perform(Selector("data"))
        
             if let afData = res?.takeUnretainedValue() as? NSData {
                 data = afData.copy() as! Data

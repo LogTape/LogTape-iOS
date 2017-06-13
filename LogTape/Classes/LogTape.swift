@@ -33,6 +33,14 @@ extension UIApplication {
             LogTape.showReportVC()
         }
         
+        if let window = UIApplication.shared.keyWindow {
+            for touch in event.touches(for: window) ?? Set<UITouch>() {
+                if let videoRecorder = LogTape.VideoRecorder {
+                    videoRecorder.handleTouch(touch)
+                }
+            }
+        }
+        
         self.lt_sendEvent(event)
     }
 }
@@ -149,18 +157,25 @@ class MessageLogEvent : LogEvent {
 
 
 open class LogTape {
-    static fileprivate var instance : LogTape? = nil
+    static var instance : LogTape? = nil
     static var swizzled = false;
 
     fileprivate var requestTimes = [URLSessionTask : Date]()
     fileprivate var events = [LogEvent]()
     fileprivate var apiKey = ""
+    var videoRecorder = LogTapeVideoRecorder()
+    var attachedScreenshots = [UIImage]()
     
     init(apiKey : String) {
         self.apiKey = apiKey
     }
+
+    static var VideoRecorder : LogTapeVideoRecorder? {
+        return instance?.videoRecorder
+    }
     
     static func showReportVC() {
+        LogTape.VideoRecorder?.stop()
         LogTapeVC.show(LogTape.instance?.apiKey ?? "")
     }
     
@@ -188,9 +203,9 @@ open class LogTape {
     fileprivate func LogURLSessionTaskFinish(_ task : URLSessionTask, data : Data?, error : NSError?)
     {
         if let startTime = self.requestTimes[task] {
-            let elapsedTime = Date().timeIntervalSince(startTime)
+            let elapsedTimeMs = Date().timeIntervalSince(startTime) * 1000.0
             
-            self.events.append(RequestLogEvent(response: task.response, request: task.originalRequest, responseData: data, error: error, elapsedTime : elapsedTime))
+            self.events.append(RequestLogEvent(response: task.response, request: task.originalRequest, responseData: data, error: error, elapsedTime : elapsedTimeMs))
             self.requestTimes.removeValue(forKey: task)
         }
     }
