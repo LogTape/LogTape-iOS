@@ -73,9 +73,6 @@ class LogTapeAlamofire {
     }
     
     func networkRequestDidFinish(_ notification : Notification) {
-        
-        let obj = notification.object as? URLSessionTask
-        
         guard let userInfo = notification.userInfo,
             let task = userInfo[Notification.Key.Task] as? URLSessionTask,
             let delegate = self.delegateFromTask(task)
@@ -84,18 +81,12 @@ class LogTapeAlamofire {
             return
         }
         
-        var error = task.error
+        let error = task.error
         var data : Data? = nil
 
-        // Ugly hack to access private data member in TaskDelegate - I prefer
-        // it to swizzling methods though, less chance of messing up internal
-        // workings
-        if delegate.responds(to: Selector("data")) {
-            let res = delegate.perform(Selector("data"))
-       
-            if let afData = res?.takeUnretainedValue() as? NSData {
-                data = afData.copy() as! Data
-            }
+        if let afData = delegate.data {
+            let nsData = afData as NSData
+            data = nsData.copy() as? Data
         }
         
         LogTape.LogURLSessionTaskFinish(task, data : data, error: error as NSError?)
