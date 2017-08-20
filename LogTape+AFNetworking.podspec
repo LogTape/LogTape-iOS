@@ -22,7 +22,7 @@ TODO: Add long description of the pod here.
                        DESC
 
   s.homepage         = 'https://github.com/LogTape/LogTape-iOS'
-  s.license          = { :type => 'MIT', :file => 'LICENSE' }
+  s.license          = { :type => 'Custom', :text : "Copyright 2017 Tightloop AB. See https://www.logtape.io/license" }
   s.author           = { 'Dan Nilsson' => 'dan@binarypeak.se' }
   s.source           = { :git => 'https://github.com/LogTape/LogTape-iOS.git' }
 
