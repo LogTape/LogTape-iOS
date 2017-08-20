@@ -31,7 +31,7 @@ Once your team integrates the tool into the day-to-day workflow it's great to in
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'Custom', :text => "Copyright 2017 Tightloop AB. See https://www.logtape.io/license" }
   s.author           = { 'Dan Nilsson' => 'dan@binarypeak.se' }
-  s.source           = { :git => 'https://github.com/<GITHUB_USERNAME>/LogTape.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/LogTape/LogTape-iOS.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '8.0'

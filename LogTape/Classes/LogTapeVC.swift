@@ -406,8 +406,9 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
             self.view.layoutIfNeeded()
         }) 
     }
+
     func className(object : AnyObject) -> String {
-        return NSStringFromClass(type(of: object)) ?? ""
+        return NSStringFromClass(type(of: object))
     }
     
     func recurse(object : AnyObject) {

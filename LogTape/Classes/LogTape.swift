@@ -60,7 +60,7 @@ class LogEvent {
     }
     
     static func currentTimeAsUTCString() -> String {
-        return LogEvent.dateFormatter.string(from: Date()) ?? ""
+        return LogEvent.dateFormatter.string(from: Date())
     }
 }
 
@@ -107,7 +107,7 @@ class RequestLogEvent : LogEvent {
         }
         
         var responseDict = NSMutableDictionary()
-        var requestDict = NSMutableDictionary()
+        let requestDict = NSMutableDictionary()
 
         if let response = response as? HTTPURLResponse {
             responseDict = ["headers" : response.allHeaderFields as NSDictionary,
