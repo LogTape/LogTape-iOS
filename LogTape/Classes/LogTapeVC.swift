@@ -447,18 +447,27 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         self.submitButton.isEnabled = false
         self.cancelButton.isEnabled = false
         
-        var request = NSMutableURLRequest(url: URL(string: "https://www.logtape.io/api/issues")!)
-
+        let request = NSMutableURLRequest(url: URL(string: "https://www.logtape.io/api/issues")!)
 
         let base64Data = ("issues:" + self.apiKey).data(using: String.Encoding.utf8)
         let authString = base64Data?.base64EncodedString(options: []) ?? ""
-        var body = NSMutableDictionary()
-        var properties = NSMutableDictionary()
+        let body = NSMutableDictionary()
+        let properties = NSMutableDictionary()
 
         if let image = self.image, let pngImage = UIImagePNGRepresentation(image)
         {
             let imageData = pngImage.base64EncodedString(options: []) as NSString
-            let images = NSArray(array : [imageData])
+            
+            let images = NSMutableArray()
+            images.add(imageData)
+            
+            for attachedImage in (LogTape.instance?.attachedScreenshots ?? []) {
+                if let pngImage = UIImagePNGRepresentation(attachedImage) {
+                    let attachedImageData = pngImage.base64EncodedString(options: []) as NSString
+                    images.add(attachedImageData)
+                }
+            }
+            
             body["images"] = images
         }
 
@@ -471,7 +480,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Basic \(authString)", forHTTPHeaderField: "Authorization")
         
-        var bundle = Bundle.main
+        let bundle = Bundle.main
         
         if let releaseVersionnumber = bundle.infoDictionary?["CFBundleShortVersionString"] as? String {
             properties["App version"] = releaseVersionnumber
