@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'LogTape+Alamofire'
-  s.version          = '0.1.1'
+  s.version          = '0.1.2'
   s.summary          = 'This integrates LogTape (https://www.logtape.io) with Alamofire.'
 
 # This description is used to generate tags and improve search results.
