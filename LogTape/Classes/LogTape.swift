@@ -45,8 +45,16 @@ extension UIApplication {
     }
 }
 
-class LogEvent {
+open class LogEvent {
     static let dateFormatter = LogEvent.InitDateFormatter()
+    let timestamp = Date()
+    static var idCounter = Int(0)
+    let id : Int
+    
+    init() {
+        self.id = LogEvent.idCounter
+        LogEvent.idCounter += 1
+    }
     
     static func InitDateFormatter() -> DateFormatter {
         let formatter = DateFormatter()
@@ -59,8 +67,8 @@ class LogEvent {
         return NSDictionary()
     }
     
-    static func currentTimeAsUTCString() -> String {
-        return LogEvent.dateFormatter.string(from: Date())
+    func timestampAsUTCString() -> String {
+        return LogEvent.dateFormatter.string(from: self.timestamp)
     }
 }
 
@@ -76,48 +84,31 @@ class ObjectLogEvent : LogEvent {
     override func toDictionary() -> NSDictionary {
         return [
             "type" : "JSON",
+            "id" : self.id,
             "message" : message,
-            "timestamp" : LogEvent.currentTimeAsUTCString(),
+            "timestamp" : timestampAsUTCString(),
             "data" : object
         ]
     }
 }
 
-class RequestLogEvent : LogEvent {
-    var response : URLResponse? = nil
+open class RequestLogStartedEvent : LogEvent {
     var request : URLRequest? = nil
-    var error : NSError? = nil
-    var responseData : Data? = nil
-    var elapsedTime : TimeInterval = 0
     
-    init(response : URLResponse?, request : URLRequest?, responseData : Data?, error : NSError?, elapsedTime : TimeInterval) {
+    init(request : URLRequest?) {
         self.request = request
-        self.response = response
-        self.error = error
-        self.responseData = responseData
-        self.elapsedTime = elapsedTime
     }
-
+    
     override func toDictionary() -> NSDictionary {
-  
-        var dataString = ""
-        
-        if let responseData = responseData {
-            dataString = String(data: responseData, encoding: String.Encoding.utf8) ?? ""
-        }
-        
-        var responseDict = NSMutableDictionary()
         let requestDict = NSMutableDictionary()
-
-        if let response = response as? HTTPURLResponse {
-            responseDict = ["headers" : response.allHeaderFields as NSDictionary,
-                            "statusCode" : response.statusCode as NSNumber,
-                            "data" : dataString,
-                            "time" : elapsedTime as NSNumber]
-        }
         
         if let request = request {
             requestDict["method"] = request.httpMethod
+
+            if let requestData = request.httpBody {
+                let dataString = String(data: requestData, encoding: String.Encoding.utf8) ?? ""
+                requestDict["data"] = dataString
+            }
             
             if let url = request.url {
                 requestDict["url"] = url.absoluteString
@@ -127,15 +118,63 @@ class RequestLogEvent : LogEvent {
                 requestDict["headers"] = headers
             }
         }
+        
+        let data = NSMutableDictionary()
+        data["request"] = requestDict
+        
+        let ret = NSMutableDictionary()
+        ret["type"] = "REQUEST_START"
+        ret["timestamp"] = timestampAsUTCString()
+        ret["data"] = data
+        ret["id"] = self.id
+    
+        return ret
+    }
+}
 
-        return [
-            "type" : "REQUEST",
-            "timestamp" : LogEvent.currentTimeAsUTCString(),
-            "data" : [
-                "response" : responseDict,
-                "request" : requestDict
-                ] as NSDictionary
-        ]
+class RequestLogEvent : LogEvent {
+    var response : URLResponse? = nil
+    var error : NSError? = nil
+    var responseData : Data? = nil
+    var requestStartedEvent : RequestLogStartedEvent
+    
+    init(startEvent : RequestLogStartedEvent,
+         response : URLResponse?, responseData : Data?,
+         error : NSError?)
+    {
+        self.requestStartedEvent = startEvent
+        self.response = response
+        self.error = error
+        self.responseData = responseData
+    }
+
+    override func toDictionary() -> NSDictionary {
+        let ret = NSMutableDictionary(dictionary : requestStartedEvent.toDictionary())
+        
+        var dataString = ""
+        
+        if let responseData = responseData {
+            dataString = String(data: responseData, encoding: String.Encoding.utf8) ?? ""
+        }
+        
+        var responseDict = NSMutableDictionary()
+
+        if let response = response as? HTTPURLResponse {
+            let elapsedTime = self.timestamp.timeIntervalSince(self.requestStartedEvent.timestamp) * 1000
+            
+            responseDict = ["headers" : response.allHeaderFields as NSDictionary,
+                            "statusCode" : response.statusCode as NSNumber,
+                            "data" : dataString,
+                            "time" : elapsedTime as NSNumber]
+        }
+
+        let dataDict = ret["data"] as! NSMutableDictionary
+        dataDict["response"] = responseDict
+        ret["type"] = "REQUEST"
+        ret["timestamp"] = timestampAsUTCString()
+        ret["id"] = self.id
+        
+        return ret
     }
 }
 
@@ -149,7 +188,8 @@ class MessageLogEvent : LogEvent {
     override func toDictionary() -> NSDictionary {
         return [
             "type" : "LOG",
-            "timestamp" : LogEvent.currentTimeAsUTCString(),
+            "id" : self.id,
+            "timestamp" : timestampAsUTCString(),
             "data" : message
         ]
     }
@@ -160,7 +200,6 @@ open class LogTape {
     static var instance : LogTape? = nil
     static var swizzled = false;
 
-    fileprivate var requestTimes = [URLSessionTask : Date]()
     fileprivate var events = [LogEvent]()
     fileprivate var apiKey = ""
     var videoRecorder = LogTapeVideoRecorder()
@@ -197,16 +236,22 @@ open class LogTape {
     }
     
     fileprivate func LogURLSessionTaskStart(_ task : URLSessionTask) {
-        self.requestTimes[task] = Date()
+        let event = RequestLogStartedEvent(request: task.originalRequest)
+        self.events.append(event)
+        pendingEvents.setObject(event, forKey: task)
     }
     
-    fileprivate func LogURLSessionTaskFinish(_ task : URLSessionTask, data : Data?, error : NSError?)
+
+    var pendingEvents = NSMapTable<URLSessionTask, RequestLogStartedEvent>(keyOptions: [.weakMemory], valueOptions: [.weakMemory])
+    
+    fileprivate func LogURLSessionTaskFinish(_ task : URLSessionTask,
+                                             data : Data?,
+                                             error : NSError?)
     {
-        if let startTime = self.requestTimes[task] {
-            let elapsedTimeMs = Date().timeIntervalSince(startTime) * 1000.0
-            
-            self.events.append(RequestLogEvent(response: task.response, request: task.originalRequest, responseData: data, error: error, elapsedTime : elapsedTimeMs))
-            self.requestTimes.removeValue(forKey: task)
+        if let startEvent = pendingEvents.object(forKey: task) {
+            let event = RequestLogEvent(startEvent: startEvent, response: task.response, responseData: data, error: error)
+            self.events.append(event)
+            pendingEvents.removeObject(forKey: task)
         }
     }
 

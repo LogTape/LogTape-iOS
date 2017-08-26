@@ -411,36 +411,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         return NSStringFromClass(type(of: object))
     }
     
-    func recurse(object : AnyObject) {
-        if let dict = object as? NSDictionary {
-            print("{")
-            for (key, val) in dict {
-                if let key = key as? String {
-                    print(key + ":" + className(object: key as AnyObject) + "=" + className(object : val as AnyObject))
-                } else {
-                    print(className(object : key as AnyObject) + "=" + className(object : val as AnyObject))
-                }
-                
-                recurse(object: val as AnyObject)
-            }
-            print("}")
-        } else if let array = object as? NSArray {
-            print("[")
-            for val in array {
-                print(className(object : val as AnyObject))
-                recurse(object: val as AnyObject)
-            }
-
-
-            print("]")
-        } else {
-            
-        }
-    }
-
     func upload() {
-
-        
         self.progressView.alpha = 0.0
         self.containerView.bringSubview(toFront: self.progressView)
         self.progressView.isHidden = false
@@ -498,11 +469,10 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         
         let eventsArray = LogTape.Events.map { $0.toDictionary() } as NSArray
         body["events"] = eventsArray
-        body["timestamp"] = LogEvent.currentTimeAsUTCString() as NSString
+        body["timestamp"] = LogEvent.dateFormatter.string(from: Date()) as NSString
         body["properties"] = properties
 
-        recurse(object: body as AnyObject)
-               request.httpMethod = "POST"
+        request.httpMethod = "POST"
         self.dimView.isUserInteractionEnabled = false
         
         if let recorder = LogTape.VideoRecorder, recorder.duration() > 0.0 {
