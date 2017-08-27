@@ -173,6 +173,7 @@ class RequestLogEvent : LogEvent {
         ret["type"] = "REQUEST"
         ret["timestamp"] = timestampAsUTCString()
         ret["id"] = self.id
+        ret["startId"] = self.requestStartedEvent.id
         
         return ret
     }
