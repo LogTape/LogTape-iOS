@@ -278,6 +278,11 @@ open class LogTape {
     static open func Log(_ message : String, tags : [String : String] = [:]) {
         self.instance?.Log(message, tags : tags)
     }
+
+    static open func Log(_ message : String, infoTag : String) {
+        self.instance?.Log(message, tags : [infoTag : "info"])
+    }
+    
     static open func LogRequestStart(_ request : URLRequest, tags : [String : String] = [:]) {
         self.instance?.LogRequestStart(request, tags: tags)
     }
