@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'LogTape'
-  s.version          = '0.1.6'
+  s.version          = '0.1.7'
   s.summary          = 'LogTape allows you to upload application logs, screenshots and videos that you can review later at https://www.logtape.io'
 
 # This description is used to generate tags and improve search results.
