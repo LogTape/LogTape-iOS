@@ -275,8 +275,8 @@ open class LogTape {
     }
 
     // Convenience static methods
-    static open func Log(_ message : String) {
-        self.instance?.Log(message)
+    static open func Log(_ message : String, tags : [String : String] = [:]) {
+        self.instance?.Log(message, tags : tags)
     }
     static open func LogRequestStart(_ request : URLRequest, tags : [String : String] = [:]) {
         self.instance?.LogRequestStart(request, tags: tags)
