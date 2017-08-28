@@ -95,10 +95,15 @@ class ViewController: UIViewController {
         
         manualTask = URLSession.shared.dataTask(with: URL(string: "https://httpbin.org/get?from=urlsession")!) {
             data, response, error in
-            LogTape.LogURLSessionTaskFinish(manualTask, data: data, error: error as NSError?)
+            if let req = manualTask.originalRequest {
+                LogTape.LogRequestFinished(req, response: response, data: data, error: error, tags: [:])
+            }
         }
-        
-        LogTape.LogURLSessionTaskStart(manualTask)
+
+        if let req = manualTask.originalRequest {
+            LogTape.LogRequestStart(req, tags: [:])
+        }
+
         manualTask.resume()
     }
 }

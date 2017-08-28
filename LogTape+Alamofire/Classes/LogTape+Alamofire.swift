@@ -63,19 +63,20 @@ class LogTapeAlamofire {
     func networkRequestDidStart(_ notification : Notification) {        
         guard let userInfo = notification.userInfo,
             let task = userInfo[Notification.Key.Task] as? URLSessionTask,
-            let _ = self.delegateFromTask(task)
+            let req = task.originalRequest
             else
         {
             return
         }
         
-        LogTape.LogURLSessionTaskStart(task)
+        LogTape.LogRequestStart(req, tags: [:])
     }
     
     func networkRequestDidFinish(_ notification : Notification) {
         guard let userInfo = notification.userInfo,
             let task = userInfo[Notification.Key.Task] as? URLSessionTask,
-            let delegate = self.delegateFromTask(task)
+            let delegate = self.delegateFromTask(task),
+            let req = task.originalRequest
             else
         {
             return
@@ -89,7 +90,7 @@ class LogTapeAlamofire {
             data = nsData.copy() as? Data
         }
         
-        LogTape.LogURLSessionTaskFinish(task, data : data, error: error as NSError?)
+        LogTape.LogRequestFinished(req, response: task.response, data: data, error: error, tags: [:])
     }
     
     func unregisterListeners() {

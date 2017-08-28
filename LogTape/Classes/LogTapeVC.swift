@@ -419,7 +419,8 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         self.submitButton.isEnabled = false
         self.cancelButton.isEnabled = false
         
-        let request = NSMutableURLRequest(url: URL(string: "https://www.logtape.io/api/issues")!)
+        //let request = NSMutableURLRequest(url: URL(string: "https://www.logtape.io/api/issues")!)
+        let request = NSMutableURLRequest(url: URL(string: "http://www.localtape.io:3000/api/issues")!)
 
         let base64Data = ("issues:" + self.apiKey).data(using: String.Encoding.utf8)
         let authString = base64Data?.base64EncodedString(options: []) ?? ""

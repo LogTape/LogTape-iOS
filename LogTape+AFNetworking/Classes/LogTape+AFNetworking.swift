@@ -27,14 +27,15 @@ open class LogTapeAFNetworking {
     
     
     func networkRequestDidStart(_ notification : Notification) {
-        guard let task = notification.object as? URLSessionTask else {
+        guard let task = notification.object as? URLSessionTask, let req = task.originalRequest else {
             return
         }
-        LogTape.LogURLSessionTaskStart(task)
+        
+        LogTape.LogRequestStart(req, tags: [:])
     }
     
     func networkRequestDidFinish(_ notification : Notification) {
-        guard let task = notification.object as? URLSessionTask else {
+        guard let task = notification.object as? URLSessionTask, let req = task.originalRequest else {
             return
         }
         
@@ -46,7 +47,7 @@ open class LogTapeAFNetworking {
             data = userInfo[AFNetworkingTaskDidCompleteResponseDataKey] as? Data
         }
         
-        LogTape.LogURLSessionTaskFinish(task, data : data, error: error as NSError?)
+        LogTape.LogRequestFinished(req, response: task.response, data: data, error: error, tags: [:])
     }
     
     func unregisterListeners() {

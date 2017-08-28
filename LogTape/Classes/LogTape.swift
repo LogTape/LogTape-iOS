@@ -50,10 +50,13 @@ open class LogEvent {
     let timestamp = Date()
     static var idCounter = Int(0)
     let id : Int
+    let tags : [String : String]
+
     
-    init() {
+    init(tags : [String : String]) {
         self.id = LogEvent.idCounter
         LogEvent.idCounter += 1
+        self.tags = tags
     }
     
     static func InitDateFormatter() -> DateFormatter {
@@ -76,7 +79,8 @@ class ObjectLogEvent : LogEvent {
     var object = NSDictionary()
     var message = NSString()
     
-    init(object : NSDictionary, message : String) {
+    init(object : NSDictionary, message : String, tags : [String : String]) {
+        super.init(tags: tags)
         self.object = object
         self.message = message as NSString
     }
@@ -87,15 +91,17 @@ class ObjectLogEvent : LogEvent {
             "id" : self.id,
             "message" : message,
             "timestamp" : timestampAsUTCString(),
-            "data" : object
+            "data" : object,
+            "tags" : self.tags
         ]
     }
 }
 
 open class RequestLogStartedEvent : LogEvent {
     var request : URLRequest? = nil
-    
-    init(request : URLRequest?) {
+
+    init(request : URLRequest?, tags : [String : String]) {
+        super.init(tags: tags)
         self.request = request
     }
     
@@ -127,22 +133,25 @@ open class RequestLogStartedEvent : LogEvent {
         ret["timestamp"] = timestampAsUTCString()
         ret["data"] = data
         ret["id"] = self.id
-    
+        ret["tags"] = self.tags
+        
         return ret
     }
 }
 
 class RequestLogEvent : LogEvent {
     var response : URLResponse? = nil
-    var error : NSError? = nil
+    var error : Error? = nil
     var responseData : Data? = nil
     var requestStartedEvent : RequestLogStartedEvent
     
     init(startEvent : RequestLogStartedEvent,
          response : URLResponse?, responseData : Data?,
-         error : NSError?)
+         error : Error?,
+         tags : [String : String])
     {
         self.requestStartedEvent = startEvent
+        super.init(tags: tags)
         self.response = response
         self.error = error
         self.responseData = responseData
@@ -166,6 +175,10 @@ class RequestLogEvent : LogEvent {
                             "statusCode" : response.statusCode as NSNumber,
                             "data" : dataString,
                             "time" : elapsedTime as NSNumber]
+            
+            if let error = self.error {
+                responseDict["error"] = error.localizedDescription
+            }
         }
 
         let dataDict = ret["data"] as! NSMutableDictionary
@@ -174,7 +187,8 @@ class RequestLogEvent : LogEvent {
         ret["timestamp"] = timestampAsUTCString()
         ret["id"] = self.id
         ret["startId"] = self.requestStartedEvent.id
-        
+        ret["tags"] = self.tags
+
         return ret
     }
 }
@@ -182,7 +196,8 @@ class RequestLogEvent : LogEvent {
 class MessageLogEvent : LogEvent {
     var message : String = ""
     
-    init(message : String) {
+    init(message : String, tags : [String : String]) {
+        super.init(tags: tags)
         self.message = message
     }
     
@@ -191,7 +206,8 @@ class MessageLogEvent : LogEvent {
             "type" : "LOG",
             "id" : self.id,
             "timestamp" : timestampAsUTCString(),
-            "data" : message
+            "data" : message,
+            "tags" : self.tags
         ]
     }
 }
@@ -228,31 +244,33 @@ open class LogTape {
         
     }
     
-    fileprivate func Log(_ message : String) {
-        self.events.append(MessageLogEvent(message: message))
+    fileprivate func Log(_ message : String, tags : [String : String] = [:]) {
+        self.events.append(MessageLogEvent(message: message, tags : tags))
     }
     
-    fileprivate func LogObject(_ object : NSDictionary, message : String = "") {
-        self.events.append(ObjectLogEvent(object: object, message: message))
+    fileprivate func LogObject(_ object : NSDictionary, message : String = "", tags : [String : String] = [:]) {
+        self.events.append(ObjectLogEvent(object: object, message: message, tags : tags))
     }
-    
-    fileprivate func LogURLSessionTaskStart(_ task : URLSessionTask) {
-        let event = RequestLogStartedEvent(request: task.originalRequest)
-        self.events.append(event)
-        pendingEvents.setObject(event, forKey: task)
-    }
-    
 
-    var pendingEvents = NSMapTable<URLSessionTask, RequestLogStartedEvent>(keyOptions: [.weakMemory], valueOptions: [.weakMemory])
+    // MARK: URLRequest convenience methods
+    var pendingReqEvents = [URLRequest : RequestLogStartedEvent]()
+
+    fileprivate func LogRequestStart(_ request : URLRequest, tags : [String : String] = [:]) {
+        let event = RequestLogStartedEvent(request: request, tags : tags)
+        self.events.append(event)
+        pendingReqEvents[request] = event
+    }
     
-    fileprivate func LogURLSessionTaskFinish(_ task : URLSessionTask,
-                                             data : Data?,
-                                             error : NSError?)
+    fileprivate func LogRequestFinished(_ request : URLRequest,
+                                        response : URLResponse?,
+                                        data : Data?,
+                                        error : Error?,
+                                        tags : [String : String])
     {
-        if let startEvent = pendingEvents.object(forKey: task) {
-            let event = RequestLogEvent(startEvent: startEvent, response: task.response, responseData: data, error: error)
+        if let startEvent = pendingReqEvents[request] {
+            let event = RequestLogEvent(startEvent: startEvent, response: response, responseData: data, error: error, tags : tags)
             self.events.append(event)
-            pendingEvents.removeObject(forKey: task)
+            pendingReqEvents.removeValue(forKey: request)
         }
     }
 
@@ -260,18 +278,21 @@ open class LogTape {
     static open func Log(_ message : String) {
         self.instance?.Log(message)
     }
-    
-    static open func LogObject(_ object : NSDictionary, message : String = "") {
-        self.instance?.LogObject(object, message : message)
+    static open func LogRequestStart(_ request : URLRequest, tags : [String : String] = [:]) {
+        self.instance?.LogRequestStart(request, tags: tags)
     }
     
-    static open func LogURLSessionTaskStart(_ task : URLSessionTask) {
-        self.instance?.LogURLSessionTaskStart(task)
-    }
-    
-    static open func LogURLSessionTaskFinish(_ task : URLSessionTask, data : Data?, error : NSError?)
+    static open func LogRequestFinished(_ request : URLRequest,
+                                        response : URLResponse?,
+                                        data : Data?,
+                                        error : Error?,
+                                        tags : [String : String])
     {
-        self.instance?.LogURLSessionTaskFinish(task, data: data, error: error)
+        self.instance?.LogRequestFinished(request, response: response, data: data, error: error, tags: tags)
+    }
+
+    static open func LogObject(_ object : NSDictionary, message : String = "", tags : [String : String] = [:]) {
+        self.instance?.LogObject(object, message : message, tags : tags)
     }
     
     static var Events : [LogEvent] {
