@@ -13,8 +13,8 @@ extension UIApplication {
             let originalSelector = #selector(UIApplication.sendEvent(_:))
             let swizzledSelector = #selector(UIApplication.lt_sendEvent(_:))
             
-            let originalMethod = class_getInstanceMethod(self, originalSelector)
-            let swizzledMethod = class_getInstanceMethod(self, swizzledSelector)
+            guard let originalMethod = class_getInstanceMethod(self, originalSelector) else { return }
+            guard let swizzledMethod = class_getInstanceMethod(self, swizzledSelector) else { return }
             
             let didAddMethod = class_addMethod(self, originalSelector, method_getImplementation(swizzledMethod), method_getTypeEncoding(swizzledMethod))
             
@@ -28,8 +28,8 @@ extension UIApplication {
     
     // MARK: - Method Swizzling
     
-    func lt_sendEvent(_ event : UIEvent) {
-        if event.subtype == UIEventSubtype.motionShake {
+    @objc func lt_sendEvent(_ event : UIEvent) {
+        if event.subtype == UIEvent.EventSubtype.motionShake {
             LogTape.showReportVC()
         }
         
@@ -235,7 +235,7 @@ open class LogTape {
         LogTapeVC.show(LogTape.instance?.apiKey ?? "")
     }
     
-    open static func start(_ apiKey : String) {
+    public static func start(_ apiKey : String) {
         self.instance = LogTape(apiKey : apiKey)
         UIApplication.lt_inject()
     }
@@ -275,19 +275,19 @@ open class LogTape {
     }
 
     // Convenience static methods
-    static open func Log(_ message : String, tags : [String : String] = [:]) {
+    public static func Log(_ message : String, tags : [String : String] = [:]) {
         self.instance?.Log(message, tags : tags)
     }
 
-    static open func Log(_ message : String, infoTag : String) {
+    public static func Log(_ message : String, infoTag : String) {
         self.instance?.Log(message, tags : [infoTag : "info"])
     }
     
-    static open func LogRequestStart(_ request : URLRequest, tags : [String : String] = [:]) {
+    public static func LogRequestStart(_ request : URLRequest, tags : [String : String] = [:]) {
         self.instance?.LogRequestStart(request, tags: tags)
     }
     
-    static open func LogRequestFinished(_ request : URLRequest,
+    public static func LogRequestFinished(_ request : URLRequest,
                                         response : URLResponse?,
                                         data : Data?,
                                         error : Error?,
@@ -296,7 +296,7 @@ open class LogTape {
         self.instance?.LogRequestFinished(request, response: response, data: data, error: error, tags: tags)
     }
 
-    static open func LogObject(_ object : NSDictionary, message : String = "", tags : [String : String] = [:]) {
+    public static func LogObject(_ object : NSDictionary, message : String = "", tags : [String : String] = [:]) {
         self.instance?.LogObject(object, message : message, tags : tags)
     }
     

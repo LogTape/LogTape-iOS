@@ -40,7 +40,7 @@ class LogTapeVideoWriter : NSObject {
                 try fileManager.removeItem(atPath: path)
             }
             
-            let videoWriter = try AVAssetWriter(outputURL: url, fileType: "public.mpeg-4")
+            let videoWriter = try AVAssetWriter(outputURL: url, fileType: convertToAVFileType("public.mpeg-4"))
             
             let videoSettings : [String : AnyObject] = [
                 AVVideoCodecKey : AVVideoCodecH264 as AnyObject,
@@ -48,11 +48,11 @@ class LogTapeVideoWriter : NSObject {
                 AVVideoHeightKey : videoSize.height as AnyObject
             ]
             
-            let writerInput = AVAssetWriterInput(mediaType: AVMediaTypeVideo, outputSettings: videoSettings)
+            let writerInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: videoSettings)
             let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: writerInput, sourcePixelBufferAttributes: nil)
             videoWriter.add(writerInput)
             videoWriter.startWriting()
-            videoWriter.startSession(atSourceTime: kCMTimeZero)
+            videoWriter.startSession(atSourceTime: CMTime.zero)
             
             self.videoWriter = videoWriter
             self.writerInput = writerInput
@@ -94,7 +94,7 @@ class LogTapeVideoWriter : NSObject {
                 
                 bitmapContext.draw(frame.cgImage!, in: CGRect(x: 0, y: 0, width: self.videoSize.width, height: self.videoSize.height))
                 
-                let time = CMTimeMake(10 * Int64(self.curFrame * LogTapeVideoRecorder.FPSPeriod), 600)
+                let time = CMTimeMake(value: 10 * Int64(self.curFrame * LogTapeVideoRecorder.FPSPeriod), timescale: 600)
                 
                 if let pixelbuffer = pixelbuffer {
                     adaptor.append(pixelbuffer, withPresentationTime: time)
@@ -141,7 +141,7 @@ class LogTapeVideoRecorder : NSObject {
                                                   userInfo: nil,
                                                   repeats: true)
         
-        RunLoop.current.add(captureFrameTimer!, forMode: RunLoopMode.commonModes)
+        RunLoop.current.add(captureFrameTimer!, forMode: RunLoop.Mode.common)
 
     }
     
@@ -209,7 +209,7 @@ class LogTapeVideoRecorder : NSObject {
         self.frames.append(overlaidFrame!)
     }
     
-    func captureFrame() {
+    @objc func captureFrame() {
         guard let window = UIApplication.shared.keyWindow else {
             return
         }
@@ -254,4 +254,9 @@ class LogTapeVideoRecorder : NSObject {
     func duration() -> TimeInterval {
         return LogTapeVideoRecorder.CaptureInterval * TimeInterval(self.frames.count);
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToAVFileType(_ input: String) -> AVFileType {
+	return AVFileType(rawValue: input)
 }

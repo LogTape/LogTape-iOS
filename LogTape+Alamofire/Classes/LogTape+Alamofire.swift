@@ -18,7 +18,7 @@ class LogTapeAlamofire {
         self.managers = self.managers.filter { $0.manager != nil && $0.manager !== manager }
     }
 
-    open static func startLoggingWithManager(_ manager : SessionManager) {
+    public static func startLoggingWithManager(_ manager : SessionManager) {
         let initialCount = self.instance.managers.count
         
         self.instance.removeManager(manager)
@@ -29,7 +29,7 @@ class LogTapeAlamofire {
         }
     }
 
-    open static func stopLoggingWithManager(_ manager : SessionManager) {
+    public static func stopLoggingWithManager(_ manager : SessionManager) {
         self.instance.removeManager(manager)
         
         if self.instance.managers.count == 0 {

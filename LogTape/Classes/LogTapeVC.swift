@@ -72,8 +72,8 @@ class CenteredButton : UIButton {
         //  above the text
         var imageEdgeInsets = UIEdgeInsets.zero
         if let text: NSString = self.titleLabel?.text as NSString?, let font = self.titleLabel?.font {
-            let attributes = [NSFontAttributeName:font]
-            let titleSize = text.size(attributes: attributes)
+            let attributes = [convertFromNSAttributedStringKey(NSAttributedString.Key.font):font]
+            let titleSize = text.size(withAttributes: convertToOptionalNSAttributedStringKeyDictionary(attributes))
             imageEdgeInsets.top = -(titleSize.height + spacing)
             imageEdgeInsets.right = -titleSize.width
         }
@@ -111,7 +111,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
     var imageView = UIImageView()
     var descriptionView = UITextView()
     var containerView = UIView()
-    var loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    var loadingIndicator = UIActivityIndicatorView(style: .gray)
     var apiKey = ""
     
     var dimView = UIView()
@@ -200,7 +200,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         self.containerView.layer.borderColor = self.borderColor.cgColor
         
         self.descriptionView.font = UIFont(name: "Avenir-Light", size: 13.0)
-        self.descriptionView.contentInset = UIEdgeInsetsMake(-4, 0, 0, 0)
+        self.descriptionView.contentInset = UIEdgeInsets.init(top: -4, left: 0, bottom: 0, right: 0)
         self.descriptionView.layer.borderColor = self.borderColor.cgColor
         self.descriptionView.layer.cornerRadius = 4.0
         self.descriptionView.layer.borderWidth = borderWidth
@@ -322,14 +322,14 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
             Constraint.PinTopToBottom(progressView, toView: topLabel)
             ])
         
-        self.containerView.bringSubview(toFront: self.progressView)
+        self.containerView.bringSubviewToFront(self.progressView)
     }
 
-    func dimViewTapped() {
+    @objc func dimViewTapped() {
         self.presentingViewController?.dismiss(animated: true, completion: nil)
     }
     
-    func imageTapped() {
+    @objc func imageTapped() {
         self.view.endEditing(true)
         let drawVc = DrawOnImageVC()
         drawVc.image = self.image
@@ -345,11 +345,11 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         self.present(nav, animated: true, completion: nil)
     }
 
-    func containerTapped() {
+    @objc func containerTapped() {
         self.view.endEditing(true)
     }
     
-    func cancel() {
+    @objc func cancel() {
         LogTape.instance?.attachedScreenshots = []
         LogTape.VideoRecorder?.clear()
         self.presentingViewController?.dismiss(animated: true, completion: nil)
@@ -378,8 +378,8 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
     func uploadSuccessfulWithNumber(_ number : Int, deletedIssueNumber : Int?) {
         self.dimView.isUserInteractionEnabled = true
         let bgImage = UIImageFromColor(self.primaryColor)
-        cancelButton.setBackgroundImage(bgImage, for: UIControlState())
-        self.cancelButton.setTitle("Done", for: UIControlState())
+        cancelButton.setBackgroundImage(bgImage, for: UIControl.State())
+        self.cancelButton.setTitle("Done", for: UIControl.State())
         self.cancelButton.isEnabled = true
         self.cancelButton.layoutIfNeeded()
 
@@ -399,7 +399,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         self.progressStatusLabel.text = "Uploaded successfully with ID \(number)." + extraInfo
         
         let constraint = Constraint.PinTopToBottom(self.cancelButton, toView: self.topLabel, margin: 80)
-        constraint.priority = 1000
+        constraint.priority = UILayoutPriority(rawValue: 1000)
         self.containerView.addConstraint(constraint)
 
         UIView.animate(withDuration: 0.4, animations: {
@@ -411,9 +411,9 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         return NSStringFromClass(type(of: object))
     }
     
-    func upload() {
+    @objc func upload() {
         self.progressView.alpha = 0.0
-        self.containerView.bringSubview(toFront: self.progressView)
+        self.containerView.bringSubviewToFront(self.progressView)
         self.progressView.isHidden = false
         
         self.submitButton.isEnabled = false
@@ -426,7 +426,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         let body = NSMutableDictionary()
         let properties = NSMutableDictionary()
 
-        if let image = self.image, let pngImage = UIImagePNGRepresentation(image)
+        if let image = self.image, let pngImage = image.pngData()
         {
             let imageData = pngImage.base64EncodedString(options: []) as NSString
             
@@ -434,7 +434,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
             images.add(imageData)
             
             for attachedImage in (LogTape.instance?.attachedScreenshots ?? []) {
-                if let pngImage = UIImagePNGRepresentation(attachedImage) {
+                if let pngImage = attachedImage.pngData() {
                     let attachedImageData = pngImage.base64EncodedString(options: []) as NSString
                     images.add(attachedImageData)
                 }
@@ -527,7 +527,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         task.resume()
     }
     
-    func viewAttachments() {
+    @objc func viewAttachments() {
         let numImages = 1 + (LogTape.instance?.attachedScreenshots.count ?? 0)
         
         var infoStr = numImages == 1 ? "You have 1 image attached" : "You have \(numImages) images attached"
@@ -545,7 +545,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         alert.show()
     }
     
-    func addScreenshot() {
+    @objc func addScreenshot() {
         if let image = self.image, let instance = LogTape.instance {
             instance.attachedScreenshots.append(image)
         }
@@ -556,7 +556,7 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
     }
 
 
-    func recordVideo() {
+    @objc func recordVideo() {
         self.presentingViewController?.dismiss(animated: true, completion: { 
             LogTape.VideoRecorder?.start()
         })
@@ -589,11 +589,11 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
     
     func addIconButton(_ title : String, icon : String, action : Selector, topView : UIView, leftView : UIView) -> UIView {
         let button = CenteredButton(type: .custom)
-        button.setImage(loadImage(icon), for: UIControlState())
+        button.setImage(loadImage(icon), for: UIControl.State())
         button.titleLabel?.font = UIFont(name: "Avenir-Light", size: 9.0)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(title, for: UIControlState())
-        button.setTitleColor(UIColor.darkGray, for: UIControlState())
+        button.setTitle(title, for: UIControl.State())
+        button.setTitleColor(UIColor.darkGray, for: UIControl.State())
         button.addTarget(self, action: action, for: .touchUpInside)
 
         self.containerView.addSubview(button)
@@ -621,15 +621,15 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
         }
         
         let bgImage = UIImageFromColor(color)
-        button.setBackgroundImage(bgImage, for: UIControlState())
+        button.setBackgroundImage(bgImage, for: UIControl.State())
         button.clipsToBounds = true
         button.layer.cornerRadius = 5.0
-        button.setTitle(title, for: UIControlState())
+        button.setTitle(title, for: UIControl.State())
         button.translatesAutoresizingMaskIntoConstraints = false
         self.containerView.addSubview(button)
         
         let topConstraint = Constraint.PinTopToBottom(button, toView: topView, margin: 10)
-        topConstraint.priority = 750
+        topConstraint.priority = UILayoutPriority(rawValue: 750)
 
         self.containerView.addConstraints([
             Constraint.PinLeft(button, toView: containerView, margin: 10),
@@ -723,4 +723,15 @@ class LogTapeVC : UIViewController, UIViewControllerTransitioningDelegate, UITex
             self.hasPlaceholderText = false
         }
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }

@@ -79,13 +79,13 @@ class DrawOnImageVC: UIViewController {
     var canvasView = DrawOnImageCanvasView()
     var onSaveBlock : ((UIImage) -> ())! = nil
     
-    func save() {
+    @objc func save() {
         self.imageView.image = self.canvasView.overlay(self.image)
         self.canvasView.clear()
         self.onSaveBlock(self.imageView.image!)
     }
     
-    func close() {
+    @objc func close() {
         self.presentingViewController?.dismiss(animated: true, completion: nil)
     }
     
@@ -140,7 +140,7 @@ class DrawOnImageVC: UIViewController {
             ])
 
         
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: UIBarButtonItemStyle.done, target: self, action: #selector(DrawOnImageVC.save))
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.cancel, target: self, action: #selector(DrawOnImageVC.close))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: UIBarButtonItem.Style.done, target: self, action: #selector(DrawOnImageVC.save))
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.cancel, target: self, action: #selector(DrawOnImageVC.close))
     }
 }

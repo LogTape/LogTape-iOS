@@ -61,9 +61,9 @@ class ViewController: UIViewController {
 
         // Test AFNetworking request
         let task = sessionManager.dataTask(with: URLRequest(url: url)) { (response, object, error) in
-            if let object = object {
-                //print(object)
-            }
+//            if let object = object {
+////                print(object)
+//            }
         }
         
         task.resume()
@@ -71,23 +71,23 @@ class ViewController: UIViewController {
         // Test alamofire request
         Alamofire.request("https://httpbin.org/get", parameters: ["from": "alamofire"])
             .responseJSON { response in
-                if let request = response.request {
-                    //print(request)  // original URL request
-                }
-                
-                if let response = response.response {
-                    //print(response) // URL response
-                }
-                
-                if let data = response.data {
-                    //print(data)     // server data
-                }
-                
-                //print(response.result)   // result of response serialization
-                
-                if let JSON = response.result.value {
-                    //print("JSON: \(JSON)")
-                }
+//                if let request = response.request {
+//                    //print(request)  // original URL request
+//                }
+//
+//                if let response = response.response {
+//                    //print(response) // URL response
+//                }
+//
+//                if let data = response.data {
+//                    //print(data)     // server data
+//                }
+//
+//                //print(response.result)   // result of response serialization
+//
+//                if let JSON = response.result.value {
+//                    //print("JSON: \(JSON)")
+//                }
         }
 
         // Test manual request
