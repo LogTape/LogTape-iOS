@@ -5,11 +5,11 @@ import AFNetworking
 open class LogTapeAFNetworking {
     static fileprivate var instance = LogTapeAFNetworking()
     
-    open static func startLogging() {
+    public static func startLogging() {
         self.instance.registerListeners()
     }
 
-    open static func stopLogging() {
+    public static func stopLogging() {
         self.instance.unregisterListeners()
     }
     
