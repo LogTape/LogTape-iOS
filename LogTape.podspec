@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'LogTape'
-  s.version          = '0.1.7'
+  s.version          = '0.1.8'
   s.summary          = 'LogTape allows you to upload application logs, screenshots and videos that you can review later at https://www.logtape.io'
 
 # This description is used to generate tags and improve search results.
@@ -35,7 +35,7 @@ Once your team integrates the tool into the day-to-day workflow it's great to in
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '8.0'
-
+  s.swift_version = '4.2'
   s.source_files = 'LogTape/Classes/**/*'
   
   s.resource_bundles = {

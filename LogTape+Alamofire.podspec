@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'LogTape+Alamofire'
-  s.version          = '0.1.7'
+  s.version          = '0.1.8'
   s.summary          = 'This integrates LogTape (https://www.logtape.io) with Alamofire.'
 
 # This description is used to generate tags and improve search results.
@@ -33,6 +33,7 @@ Once your team integrates the tool into the day-to-day workflow it's great to in
   s.source           = { :git => 'https://github.com/LogTape/LogTape-iOS.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '9.0'
+  s.swift_version = '4.2'
 
   s.source_files = 'LogTape+Alamofire/Classes/**/*'
   s.dependency 'LogTape'

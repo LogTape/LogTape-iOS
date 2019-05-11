@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'LogTape+AFNetworking'
-  s.version          = '0.1.7'
+  s.version          = '0.1.8'
   s.summary          = 'This integrates LogTape (https://www.logtape.io) with AFNetworking.'
 
 # This description is used to generate tags and improve search results.
@@ -34,6 +34,7 @@ Once your team integrates the tool into the day-to-day workflow it's great to in
 
   s.ios.deployment_target = '9.0'
 
+  s.swift_version = '4.2'
   s.source_files = 'LogTape+AFNetworking/Classes/**/*'
   s.dependency 'LogTape'
   s.dependency 'AFNetworking'
