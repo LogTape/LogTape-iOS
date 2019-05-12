@@ -15,11 +15,11 @@ PODS:
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
   - Alamofire (4.4.0)
-  - LogTape (0.1.0)
-  - LogTape+AFNetworking (0.1.0):
+  - LogTape (0.1.8)
+  - "LogTape+AFNetworking (0.1.8)":
     - AFNetworking
     - LogTape
-  - LogTape+Alamofire (0.1.0):
+  - "LogTape+Alamofire (0.1.8)":
     - Alamofire
     - LogTape
 
@@ -27,24 +27,29 @@ DEPENDENCIES:
   - AFNetworking
   - Alamofire
   - LogTape (from `../`)
-  - LogTape+AFNetworking (from `../`)
-  - LogTape+Alamofire (from `../`)
+  - "LogTape+AFNetworking (from `../`)"
+  - "LogTape+Alamofire (from `../`)"
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AFNetworking
+    - Alamofire
 
 EXTERNAL SOURCES:
   LogTape:
     :path: "../"
-  LogTape+AFNetworking:
+  "LogTape+AFNetworking":
     :path: "../"
-  LogTape+Alamofire:
+  "LogTape+Alamofire":
     :path: "../"
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
   Alamofire: dc44b1600b800eb63da6a19039a0083d62a6a62d
-  LogTape: 34dd6e6b9c53310c8eeed57a71b0bd613e6128fc
-  LogTape+AFNetworking: b8a9ffc87f61a2d656ad8974199712b692046eb3
-  LogTape+Alamofire: d0c3e5c1e342aa3ed7db955116a4998b96aed164
+  LogTape: 5672da51377ba8ca7c1a7f549ab73fe3cdca273f
+  "LogTape+AFNetworking": a93652785a1cbcc2e3ffd917241be4b22db97ee3
+  "LogTape+Alamofire": c8f48fe6cfaa8d066ee656b618bed0b0b07aec58
 
 PODFILE CHECKSUM: d282f1f6e32ca457765c035f778215cd4c118d48
 
-COCOAPODS: 1.2.0
+COCOAPODS: 1.6.1
